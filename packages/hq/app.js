@@ -1,553 +1,480 @@
 /* ============================================
-   HQ — Mission Control Dashboard
+   Mission Control — Sprint Blocks + Dashboard
    Pure vanilla JS — no dependencies
+   state.json = structure, localStorage = task checkbox state
    ============================================ */
 
 (function () {
   'use strict';
 
-  // SHA-256 hash of "even2026"
-  const HASH = '526f5f655785ee7230d6679e465f1b046e223e5502a646db9fc7d851bd224b45';
-  const AUTH_KEY = 'hq_auth';
+  var HASH = '526f5f655785ee7230d6679e465f1b046e223e5502a646db9fc7d851bd224b45';
+  var AUTH_KEY = 'hq_auth';
+  var TASKS_KEY = 'mc_tasks'; // localStorage: { taskId: true/false }
 
-  // Session persistence with fallback for restricted contexts
-  let _memAuth = false;
-  const _ss = (function() { try { const k = 'session' + 'Storage'; return window[k]; } catch(e) { return null; } })();
-  function getAuth() {
-    try { return _ss && _ss.getItem(AUTH_KEY) === 'true'; } catch(e) { return _memAuth; }
+  function _ls() { try { return window.localStorage; } catch(e) { return null; } }
+  function _ss() { try { return window.sessionStorage; } catch(e) { return null; } }
+
+  var _memAuth = false;
+  function getAuth() { try { var s = _ss(); return s && s.getItem(AUTH_KEY) === 'true'; } catch(e) { return _memAuth; } }
+  function setAuth() { _memAuth = true; try { var s = _ss(); if(s) s.setItem(AUTH_KEY, 'true'); } catch(e) {} }
+
+  // ── Task State (localStorage) ─────────────
+
+  var taskState = {};
+
+  function loadTaskState() {
+    var ls = _ls(); if (!ls) return;
+    try { var raw = ls.getItem(TASKS_KEY); if (raw) taskState = JSON.parse(raw); } catch(e) {}
   }
-  function setAuth() {
-    _memAuth = true;
-    try { if (_ss) _ss.setItem(AUTH_KEY, 'true'); } catch(e) { /* ignore */ }
+
+  function saveTaskState() {
+    var ls = _ls(); if (!ls) return;
+    try { ls.setItem(TASKS_KEY, JSON.stringify(taskState)); } catch(e) {}
+  }
+
+  function isTaskDone(id) { return taskState[id] === true; }
+
+  function toggleTask(id) {
+    taskState[id] = !isTaskDone(id);
+    saveTaskState();
   }
 
   // ── Password Gate ──────────────────────────
 
-  async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  async function sha256(msg) {
+    var buf = new TextEncoder().encode(msg);
+    var hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
   }
 
-  function showDashboard() {
+  function showApp() {
     document.getElementById('gate').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
-    loadData();
+    document.getElementById('app').classList.remove('hidden');
+    initApp();
   }
 
   function initGate() {
-    // Check session
-    if (getAuth()) {
-      showDashboard();
-      return;
-    }
-
-    const form = document.getElementById('gate-form');
-    const input = document.getElementById('gate-input');
-    const error = document.getElementById('gate-error');
-
+    if (getAuth()) { showApp(); return; }
+    var form = document.getElementById('gate-form');
+    var input = document.getElementById('gate-input');
+    var error = document.getElementById('gate-error');
     input.focus();
 
     async function tryLogin() {
-      const value = input.value;
-      if (!value) return;
-
-      let match = false;
-      try {
-        const hash = await sha256(value);
-        match = (hash === HASH);
-      } catch(e) {
-        // crypto.subtle not available (HTTP context) — fallback
-        match = (value === 'even2026');
-      }
-
-      if (match) {
-        setAuth();
-        showDashboard();
-      } else {
-        error.textContent = 'Invalid password';
-        input.value = '';
-        input.focus();
-        setTimeout(() => { error.textContent = ''; }, 2000);
-      }
+      var v = input.value; if (!v) return;
+      var match = false;
+      try { match = (await sha256(v)) === HASH; } catch(e) { match = (v === 'even2026'); }
+      if (match) { setAuth(); showApp(); }
+      else { error.textContent = 'Invalid password'; input.value = ''; input.focus(); setTimeout(function() { error.textContent = ''; }, 2000); }
     }
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      tryLogin();
-    });
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        tryLogin();
-      }
-    });
+    form.addEventListener('submit', function(e) { e.preventDefault(); tryLogin(); });
   }
 
-  // ── Data Loading ───────────────────────────
+  // ── App State ─────────────────────────────
+
+  var data = null;
+  var focusProjectId = null;
+
+  // ── Init ──────────────────────────────────
+
+  function initApp() {
+    loadTaskState();
+    initTheme();
+    initTabs();
+    initBackBtn();
+    loadData();
+  }
 
   async function loadData() {
     try {
-      const res = await fetch('data/state.json');
-      if (!res.ok) throw new Error('Failed to load state.json');
-      const data = await res.json();
-      render(data);
-    } catch (err) {
-      console.error('Error loading data:', err);
-      document.querySelector('.main').innerHTML =
-        '<p style="color:var(--text-muted);font-family:var(--font-mono);font-size:13px;">Error loading data.</p>';
+      var res = await fetch('data/state.json');
+      if (!res.ok) throw new Error('Failed');
+      data = await res.json();
+      renderAll();
+    } catch(e) {
+      console.error('Error loading state.json:', e);
     }
   }
 
-  // ── Render ─────────────────────────────────
-
-  function render(data) {
-    renderHeader(data);
-    renderProgressLog(data.progress_log);
-    renderTimeline(data.key_dates);
-    renderArticles(data.articles);
-    renderContentQueue(data.content_queue);
-    renderPipeline(data.pipeline);
-    renderClients(data.clients);
-    renderIdeas(data.ideas);
-    renderTeam(data.team);
+  function renderAll() {
+    renderMissionHero();
+    renderProjectList();
+    renderNumbers();
+    renderDashboard();
   }
 
-  // ── Header ─────────────────────────────────
+  // ── Theme ─────────────────────────────────
 
-  function renderHeader(data) {
-    const el = document.getElementById('last-updated');
-    if (data.last_updated) {
-      const d = new Date(data.last_updated);
-      el.textContent = 'Updated ' + formatDateTime(d);
+  function initTheme() {
+    var ls = _ls();
+    var saved = ls ? ls.getItem('hq_theme') : null;
+    if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) { document.documentElement.removeAttribute('data-theme'); try { _ls().setItem('hq_theme', 'light'); } catch(e) {} }
+      else { document.documentElement.setAttribute('data-theme', 'dark'); try { _ls().setItem('hq_theme', 'dark'); } catch(e) {} }
+    });
+  }
+
+  // ── Tabs ──────────────────────────────────
+
+  function initTabs() {
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() { switchTab(btn.getAttribute('data-tab')); });
+    });
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+    document.getElementById('view-blocks').classList.toggle('hidden', tab !== 'blocks');
+    document.getElementById('view-dashboard').classList.toggle('hidden', tab !== 'dashboard');
+    if (tab !== 'blocks') exitFocus();
+  }
+
+  // ── Back Button ───────────────────────────
+
+  function initBackBtn() {
+    document.getElementById('back-btn').addEventListener('click', exitFocus);
+  }
+
+  // ── Mission Hero ──────────────────────────
+
+  function renderMissionHero() {
+    var el = document.getElementById('mission-hero');
+    if (!data || !data.mission) { el.innerHTML = ''; return; }
+    var m = data.mission;
+    var deadline = new Date(m.deadline + 'T23:59:59');
+    var now = new Date();
+    var daysLeft = Math.max(0, Math.ceil((deadline - now) / (1000 * 60 * 60 * 24)));
+
+    // Determine current week
+    var todayStr = formatISO(now);
+    var weeks = m.weeks || [];
+
+    var weekSegments = weeks.map(function(w) {
+      if (todayStr > w.end) return 'is-done';
+      if (todayStr >= w.start && todayStr <= w.end) return 'is-current';
+      return '';
+    }).map(function(cls) {
+      return '<div class="week-segment ' + cls + '"></div>';
+    }).join('');
+
+    var weekLabels = weeks.map(function(w) {
+      var cls = '';
+      if (todayStr > w.end) cls = 'is-done';
+      else if (todayStr >= w.start && todayStr <= w.end) cls = 'is-current';
+      return '<div class="week-label ' + cls + '">W' + w.num + ' ' + w.name + '</div>';
+    }).join('');
+
+    el.innerHTML =
+      '<div class="mission-hero-card">' +
+        '<div class="mission-target">' + esc(m.target) + '</div>' +
+        '<div class="mission-deadline">Deadline: ' + formatDate(deadline) + '</div>' +
+        '<div class="mission-countdown">' + daysLeft + '<span>days left</span></div>' +
+        '<div class="week-track">' + weekSegments + '</div>' +
+        '<div class="week-labels">' + weekLabels + '</div>' +
+      '</div>';
+  }
+
+  // ── Project List ──────────────────────────
+
+  function getActiveBlockIndex(project) {
+    for (var i = 0; i < project.blocks.length; i++) {
+      var block = project.blocks[i];
+      var allDone = block.tasks.every(function(t) { return isTaskDone(t.id); });
+      if (!allDone) return i;
     }
+    return project.blocks.length; // all complete
   }
 
-  // ── Timeline ───────────────────────────────
+  function renderProjectList() {
+    var el = document.getElementById('project-list');
+    if (!data || !data.projects) { el.innerHTML = ''; return; }
 
-  function renderTimeline(dates) {
-    const container = document.getElementById('timeline');
-    if (!dates || dates.length === 0) {
-      container.innerHTML = '<p class="empty-state">No upcoming dates.</p>';
+    if (focusProjectId) {
+      el.classList.add('hidden');
+      document.getElementById('mission-hero').classList.add('hidden');
       return;
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = formatISODate(today);
+    el.classList.remove('hidden');
+    document.getElementById('mission-hero').classList.remove('hidden');
 
-    container.innerHTML = dates.map(item => {
-      const itemDate = new Date(item.date + 'T00:00:00');
-      let cls = 'timeline-item';
+    el.innerHTML = data.projects.map(function(project) {
+      var totalBlocks = project.blocks.length;
+      var activeIdx = getActiveBlockIndex(project);
+      var doneBlocks = activeIdx;
+      var isAllDone = activeIdx >= totalBlocks;
 
-      if (item.date === todayStr) {
-        cls += ' is-today';
-      } else if (itemDate < today) {
-        cls += ' is-past';
+      // Block progress segments
+      var segments = project.blocks.map(function(b, i) {
+        if (i < activeIdx) return '<div class="block-segment is-done"></div>';
+        if (i === activeIdx) return '<div class="block-segment is-active"></div>';
+        return '<div class="block-segment"></div>';
+      }).join('');
+
+      var currentBlock = isAllDone ? null : project.blocks[activeIdx];
+      var currentTasks = currentBlock ? currentBlock.tasks : [];
+      var tasksDone = currentTasks.filter(function(t) { return isTaskDone(t.id); }).length;
+
+      var blockInfo = isAllDone
+        ? 'All blocks complete'
+        : 'Block ' + (activeIdx + 1) + ': ' + currentBlock.name + ' — ' + tasksDone + '/' + currentTasks.length + ' tasks';
+
+      return '<div class="project-card" data-project="' + project.id + '">' +
+        '<div class="project-card-top">' +
+          '<span class="project-card-name">' + esc(project.name) + '</span>' +
+          '<span class="project-card-progress-text">' + doneBlocks + '/' + totalBlocks + '</span>' +
+        '</div>' +
+        '<div class="block-track">' + segments + '</div>' +
+        '<div class="project-card-block">' +
+          '<span>' + esc(blockInfo) + '</span>' +
+          (isAllDone ? '' : '<span class="project-card-enter">Enter &#8594;</span>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    el.querySelectorAll('.project-card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        var id = card.getAttribute('data-project');
+        enterFocus(id);
+      });
+    });
+  }
+
+  // ── Focus Mode ────────────────────────────
+
+  function enterFocus(projectId) {
+    focusProjectId = projectId;
+    document.getElementById('project-list').classList.add('hidden');
+    document.getElementById('mission-hero').classList.add('hidden');
+    document.getElementById('focus-mode').classList.remove('hidden');
+    document.getElementById('back-btn').classList.remove('hidden');
+    document.getElementById('tab-switcher').classList.add('hidden');
+
+    var project = data.projects.find(function(p) { return p.id === projectId; });
+    if (project) document.getElementById('header-title').textContent = project.name;
+
+    renderFocus();
+  }
+
+  function exitFocus() {
+    focusProjectId = null;
+    document.getElementById('focus-mode').classList.add('hidden');
+    document.getElementById('focus-mode').innerHTML = '';
+    document.getElementById('back-btn').classList.add('hidden');
+    document.getElementById('tab-switcher').classList.remove('hidden');
+    document.getElementById('header-title').textContent = 'Mission Control';
+    renderProjectList();
+  }
+
+  function renderFocus() {
+    var el = document.getElementById('focus-mode');
+    var project = data.projects.find(function(p) { return p.id === focusProjectId; });
+    if (!project) return;
+
+    var activeIdx = getActiveBlockIndex(project);
+    var isAllDone = activeIdx >= project.blocks.length;
+
+    var html = '';
+
+    // Project name
+    html += '<div class="focus-project-name">' + esc(project.name) + '</div>';
+
+    // Completed blocks (collapsed)
+    if (activeIdx > 0) {
+      html += '<div class="completed-blocks">';
+      for (var c = 0; c < activeIdx; c++) {
+        html += '<div class="completed-block">' +
+          '<span class="completed-block-check"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+          'Block ' + (c + 1) + ': ' + esc(project.blocks[c].name) +
+        '</div>';
+      }
+      html += '</div>';
+    }
+
+    if (isAllDone) {
+      html += '<div class="block-complete-banner">' +
+        '<div class="block-complete-text">All blocks complete. Project done.</div>' +
+      '</div>';
+    } else {
+      var block = project.blocks[activeIdx];
+      var tasks = block.tasks;
+      var done = tasks.filter(function(t) { return isTaskDone(t.id); }).length;
+      var total = tasks.length;
+      var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      var allTasksDone = done === total;
+
+      html += '<div class="focus-block-name">Block ' + (activeIdx + 1) + ': ' + esc(block.name) + '</div>';
+      html += '<div class="focus-progress">' +
+        '<div class="focus-bar"><div class="focus-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<span class="focus-bar-text">' + done + '/' + total + ' tasks</span>' +
+      '</div>';
+
+      // Tasks
+      html += '<div class="task-list">';
+      tasks.forEach(function(task) {
+        var isDone = isTaskDone(task.id);
+        html += '<div class="task-item" data-task="' + task.id + '">' +
+          '<button class="task-checkbox ' + (isDone ? 'checked' : '') + '" aria-label="Toggle task">' +
+            (isDone ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '') +
+          '</button>' +
+          '<div class="task-content">' +
+            '<div class="task-text ' + (isDone ? 'is-done' : '') + '">' + esc(task.text) + '</div>' +
+            (task.tag ? '<div class="task-tag">' + esc(task.tag) + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      });
+      html += '</div>';
+
+      // Block complete banner
+      if (allTasksDone) {
+        var nextBlock = project.blocks[activeIdx + 1];
+        html += '<div class="block-complete-banner">' +
+          '<div class="block-complete-text">Block ' + (activeIdx + 1) + ' done.' +
+            (nextBlock ? ' Ready for Block ' + (activeIdx + 2) + '?' : ' Project complete.') +
+          '</div>' +
+        '</div>';
       }
 
-      // Find next upcoming
-      const isNext = !dates.some(d => d.date === todayStr) &&
-                     itemDate > today &&
-                     !dates.filter(d => new Date(d.date + 'T00:00:00') > today && new Date(d.date + 'T00:00:00') < itemDate).length;
-
-      if (isNext) cls += ' is-next';
-
-      return `
-        <div class="${cls}">
-          <span class="timeline-date">${formatShortDate(itemDate)}</span>
-          <span class="timeline-dot"></span>
-          <span class="timeline-event">${esc(item.event)}</span>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // ── Articles ───────────────────────────────
-
-  function renderArticles(articles) {
-    const container = document.getElementById('articles');
-    if (!articles || articles.length === 0) {
-      container.innerHTML = '<p class="empty-state">No articles.</p>';
-      return;
-    }
-
-    container.innerHTML = articles.map(article => {
-      const badgeClass = article.status === 'published' ? 'badge-published' :
-                         article.status === 'rewritten' ? 'badge-rewritten' :
-                         article.status === 'rewriting' ? 'badge-rewriting' :
-                         article.status === 'pending_review' ? 'badge-pending' :
-                         article.status === 'approved' ? 'badge-approved' :
-                         article.status === 'brief' ? 'badge-brief' : 'badge-draft';
-
-      const statusLabel = article.status === 'pending_review' ? 'pending review' :
-                          article.status.replace(/_/g, ' ');
-
-      const previewUrl = article.preview_url || article.url || (article.file ? article.file : null);
-      const titleContent = previewUrl
-        ? `<a href="${esc(previewUrl)}" target="_blank" rel="noopener">${esc(article.title)}</a>`
-        : esc(article.title);
-
-      const subtitleHtml = article.subtitle
-        ? `<div class="article-subtitle">${esc(article.subtitle)}</div>` : '';
-
-      const reviewActions = article.status === 'pending_review'
-        ? `<div class="review-actions">
-             <button class="btn-approve" data-id="${article.id}" onclick="event.stopPropagation(); window._approveArticle(${article.id})">Approve</button>
-             <button class="btn-reject" data-id="${article.id}" onclick="event.stopPropagation(); window._rejectArticle(${article.id})">Needs work</button>
-           </div>` : '';
-
-      const readLink = previewUrl
-        ? `<a href="${esc(previewUrl)}" target="_blank" rel="noopener" class="article-read-link">Read &rarr;</a>`
-        : '';
-
-      const liveLink = article.url
-        ? `<a href="${esc(article.url)}" target="_blank" rel="noopener" class="article-live-link">Live &uarr;</a>`
-        : '';
-
-      return `
-        <div class="article-card ${article.status === 'pending_review' ? 'pending-review' : ''}" onclick="this.classList.toggle('expanded')">
-          <div class="article-top">
-            <span class="article-title">${titleContent}</span>
-            <span class="badge ${badgeClass}">${esc(statusLabel)}</span>
-          </div>
-          ${subtitleHtml}
-          <div class="article-meta">
-            <span class="article-meta-item">${esc(article.version)}</span>
-            ${article.words > 0 ? `<span class="article-meta-item">${article.words.toLocaleString()} words</span>` : ''}
-            <span class="article-meta-item">#${article.id}</span>
-            ${readLink}
-            ${liveLink}
-          </div>
-          <div class="article-summary">${esc(article.summary)}</div>
-          ${article.notes ? `<div class="article-notes">${esc(article.notes)}</div>` : ''}
-          ${reviewActions}
-        </div>
-      `;
-    }).join('');
-  }
-
-  // Article approval/rejection handlers (state is local-only)
-  window._approveArticle = function(id) {
-    const card = document.querySelector(`[data-id="${id}"]`);
-    if (card) {
-      const articleCard = card.closest('.article-card');
-      const badge = articleCard.querySelector('.badge');
-      badge.className = 'badge badge-approved';
-      badge.textContent = 'approved';
-      articleCard.classList.remove('pending-review');
-      articleCard.classList.add('approved');
-      const actions = articleCard.querySelector('.review-actions');
-      if (actions) actions.innerHTML = '<span class="review-confirmed">Marked for publishing</span>';
-    }
-  };
-
-  window._rejectArticle = function(id) {
-    const card = document.querySelector(`[data-id="${id}"]`);
-    if (card) {
-      const articleCard = card.closest('.article-card');
-      const badge = articleCard.querySelector('.badge');
-      badge.className = 'badge badge-draft';
-      badge.textContent = 'needs work';
-      articleCard.classList.remove('pending-review');
-      const actions = articleCard.querySelector('.review-actions');
-      if (actions) actions.innerHTML = '<span class="review-confirmed">Flagged for revision</span>';
-    }
-  };
-
-  // ── Content Queue ──────────────────────────
-
-  function renderContentQueue(queue) {
-    const container = document.getElementById('content-queue');
-    if (!queue || queue.length === 0) {
-      container.innerHTML = '<p class="empty-state">Queue empty.</p>';
-      return;
-    }
-
-    container.innerHTML = queue.map(item => {
-      const badgeClass = item.status === 'ready' ? 'badge-ready' :
-                         item.status === 'done' ? 'badge-published' : 'badge-draft';
-
-      let scheduledStr = '';
-      if (item.scheduled) {
-        const d = new Date(item.scheduled);
-        scheduledStr = formatDateTime(d);
+      // Next block teaser (if not last)
+      if (!allTasksDone && activeIdx + 1 < project.blocks.length) {
+        var next = project.blocks[activeIdx + 1];
+        html += '<div class="next-block-teaser">Next block: ' + esc(next.name) + ' (unlocks when done)</div>';
       }
 
-      return `
-        <div class="queue-card">
-          <div class="queue-header">
-            <span class="queue-title">${esc(item.title)}</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="badge ${badgeClass}">${esc(item.status)}</span>
-              ${scheduledStr ? `<span class="queue-scheduled">${scheduledStr}</span>` : ''}
-            </div>
-          </div>
-          <p class="queue-desc">${esc(item.description)}</p>
-          <p class="queue-type">${esc(item.type)}</p>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // ── Pipeline ───────────────────────────────
-
-  function renderPipeline(pipeline) {
-    const container = document.getElementById('pipeline');
-    if (!pipeline) {
-      container.innerHTML = '<p class="empty-state">No pipeline data.</p>';
-      return;
+      // Locked future blocks
+      if (activeIdx + 1 < project.blocks.length) {
+        html += '<div class="locked-blocks">';
+        for (var l = activeIdx + 1; l < project.blocks.length; l++) {
+          html += '<div class="locked-block">' +
+            '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+            'Block ' + (l + 1) + ': ' + esc(project.blocks[l].name) +
+          '</div>';
+        }
+        html += '</div>';
+      }
     }
 
-    const rows = (pipeline.breakdown || []).map(deal => {
-      const badgeClass = deal.status === 'awaiting_confirmation' ? 'badge-awaiting' :
-                         deal.status === 'early_stage' ? 'badge-early' :
-                         deal.status === 'active' ? 'badge-active' : 'badge-draft';
-      const statusLabel = deal.status.replace(/_/g, ' ');
+    el.innerHTML = html;
 
-      return `
-        <tr>
-          <td class="pipeline-client">${esc(deal.client)}</td>
-          <td class="pipeline-value">${esc(deal.value)}</td>
-          <td><span class="badge ${badgeClass}">${esc(statusLabel)}</span></td>
-          <td class="pipeline-notes">${esc(deal.notes)}</td>
-        </tr>
-      `;
-    }).join('');
-
-    container.innerHTML = `
-      <div>
-        <span class="pipeline-total-label">Total Pipeline</span>
-        <div class="pipeline-total">${esc(pipeline.total_value)}</div>
-      </div>
-      <div class="pipeline-table-wrap">
-        <table class="pipeline-table">
-          <thead>
-            <tr>
-              <th>Client</th>
-              <th>Value</th>
-              <th>Status</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    `;
+    // Attach task toggle handlers
+    el.querySelectorAll('.task-checkbox').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var taskId = btn.closest('.task-item').getAttribute('data-task');
+        toggleTask(taskId);
+        renderFocus();
+      });
+    });
   }
 
-  // ── Clients ────────────────────────────────
+  // ── Dashboard ─────────────────────────────
 
-  function renderClients(clients) {
-    const container = document.getElementById('clients');
-    if (!clients || clients.length === 0) {
-      container.innerHTML = '<p class="empty-state">No active clients.</p>';
-      return;
-    }
+  function renderDashboard() {
+    if (!data) return;
+    renderPipeline();
+    renderCadence();
+    renderPlatforms();
+  }
 
-    container.innerHTML = clients.map(client => {
-      const badgeClass = client.status === 'active' ? 'badge-active' : 'badge-draft';
+  function renderPipeline() {
+    var el = document.getElementById('pipeline-cards');
+    var totalEl = document.getElementById('pipeline-total');
+    if (!data.pipeline) return;
 
-      return `
-        <div class="client-card">
-          <div class="client-header">
-            <span class="client-name">${esc(client.name)}</span>
-            <span class="badge ${badgeClass}">${esc(client.status)}</span>
-          </div>
-          <div class="client-details">
-            <div>
-              <span class="client-detail-label">Type</span>
-              <span class="client-detail">${esc(client.type)}</span>
-            </div>
-            <div>
-              <span class="client-detail-label">Value</span>
-              <span class="client-value">${esc(client.value)}</span>
-            </div>
-            ${client.website ? `<a href="${esc(client.website)}" target="_blank" rel="noopener" class="client-link">${esc(client.website)}</a>` : ''}
-          </div>
-          ${client.notes ? `<div class="client-notes">${esc(client.notes)}</div>` : ''}
-        </div>
-      `;
+    totalEl.textContent = (data.numbers ? data.numbers.pipeline_total : '') + ' pipeline';
+
+    el.innerHTML = data.pipeline.map(function(p) {
+      var dotClass = p.status === 'active' ? 'green' : p.status === 'waiting' ? 'yellow' : 'gray';
+      return '<div class="pipe-card">' +
+        '<div class="pipe-card-top">' +
+          '<span class="pipe-dot ' + dotClass + '"></span>' +
+          '<span class="pipe-name">' + esc(p.name) + '</span>' +
+        '</div>' +
+        '<div class="pipe-value">' + esc(p.value) + '</div>' +
+        '<div class="pipe-note">' + esc(p.note) + '</div>' +
+        '<div class="pipe-type">' + esc(p.type) + '</div>' +
+      '</div>';
     }).join('');
   }
 
-  // ── Ideas ──────────────────────────────────
+  function renderCadence() {
+    var el = document.getElementById('cadence-grid');
+    if (!data.content_cadence) return;
 
-  function renderIdeas(ideas) {
-    const container = document.getElementById('ideas');
-    if (!ideas || ideas.length === 0) {
-      container.innerHTML = '<p class="empty-state">No ideas yet.</p>';
-      return;
-    }
+    var cc = data.content_cadence;
+    var channels = cc.channels;
+    var brandNames = Object.keys(cc.brands);
 
-    container.innerHTML = ideas.map(idea => {
-      const badgeClass = idea.status === 'raw_idea' ? 'badge-raw' :
-                         idea.status === 'developing' ? 'badge-developing' :
-                         idea.status === 'ready' ? 'badge-ready' : 'badge-draft';
-      const statusLabel = idea.status.replace(/_/g, ' ');
+    var headerRow = '<tr><th></th>' + brandNames.map(function(b) { return '<th>' + esc(b) + '</th>'; }).join('') + '</tr>';
 
-      const linkedArticle = idea.has_article
-        ? `<span class="idea-linked">Linked to Article #${idea.article_id}</span>` : '';
+    var rows = channels.map(function(ch) {
+      var cells = brandNames.map(function(brand) {
+        var entry = cc.brands[brand][ch];
+        if (entry === null || entry === undefined) return '<td><span class="cadence-chip na">—</span></td>';
+        if (entry.status === 'blocked') return '<td><span class="cadence-chip blocked">' + esc(entry.note || 'Blocked') + '</span></td>';
+        if (entry.status === 'not_started') return '<td><span class="cadence-chip not-started">Not started</span></td>';
+        var label = entry.done + '/' + entry.target + ' this ' + entry.period;
+        var cls = entry.done >= entry.target ? 'on-track' : entry.done > 0 ? 'behind' : 'not-started';
+        return '<td><span class="cadence-chip ' + cls + '">' + esc(label) + '</span></td>';
+      }).join('');
+      return '<tr><td>' + esc(ch) + '</td>' + cells + '</tr>';
+    }).join('');
 
-      return `
-        <div class="idea-card ${idea.status === 'developing' ? 'developing' : ''}">
-          <div class="idea-header">
-            <span class="idea-title">${esc(idea.title)}</span>
-            <span class="badge ${badgeClass}">${esc(statusLabel)}</span>
-          </div>
-          <p class="idea-summary">${esc(idea.summary)}</p>
-          <div class="idea-footer">
-            ${idea.origin ? `<span class="idea-origin">${esc(idea.origin)}</span>` : ''}
-            ${linkedArticle}
-          </div>
-        </div>
-      `;
+    el.innerHTML = '<table class="cadence-table"><thead>' + headerRow + '</thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  function renderPlatforms() {
+    var el = document.getElementById('platforms');
+    if (!data.platforms) return;
+
+    el.innerHTML = data.platforms.map(function(p) {
+      return '<a href="' + esc(p.url) + '" target="_blank" rel="noopener" class="platform-card">' +
+        '<div>' +
+          '<div class="platform-name">' + esc(p.name) + '</div>' +
+          '<div class="platform-action">' + esc(p.action) + '</div>' +
+        '</div>' +
+        '<span class="platform-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>' +
+      '</a>';
     }).join('');
   }
 
-  // ── Team ───────────────────────────────────
+  // ── Numbers Footer ────────────────────────
 
-  function renderTeam(team) {
-    const container = document.getElementById('team');
-    if (!team || !team.members) {
-      container.innerHTML = '<p class="empty-state">No team data.</p>';
-      return;
-    }
+  function renderNumbers() {
+    if (!data || !data.numbers) return;
+    document.getElementById('num-mrr').textContent = data.numbers.mrr;
+    document.getElementById('num-pipeline').textContent = data.numbers.pipeline_total;
+    document.getElementById('num-costs').textContent = data.numbers.costs;
 
-    container.innerHTML = team.members.map(member => {
-      return `
-        <div class="team-card">
-          <div class="team-tag">${esc(member.tag)}</div>
-          <div class="team-info">
-            <span class="team-name">${esc(member.name)}</span>
-            <span class="team-role">${esc(member.role)}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
+    var deadline = new Date(data.mission.deadline + 'T23:59:59');
+    var daysLeft = Math.max(0, Math.ceil((deadline - new Date()) / (1000 * 60 * 60 * 24)));
+    document.getElementById('num-days').textContent = daysLeft;
   }
 
-  // ── Progress Log ──────────────────────────
-
-  function renderProgressLog(log) {
-    const container = document.getElementById('progress-log');
-    if (!container) return;
-    if (!log || log.length === 0) {
-      container.innerHTML = '<p class="empty-state">No activity logged.</p>';
-      return;
-    }
-
-    container.innerHTML = log.map(entry => {
-      const items = entry.entries.map(e => `<li>${esc(e)}</li>`).join('');
-      return `
-        <div class="log-entry">
-          <div class="log-header">
-            <span class="log-date">${esc(entry.date)}</span>
-            <span class="log-agent">${esc(entry.agent)}</span>
-          </div>
-          <ul class="log-list">${items}</ul>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // ── Utilities ──────────────────────────────
+  // ── Utilities ─────────────────────────────
 
   function esc(str) {
     if (str == null) return '';
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.textContent = String(str);
     return div.innerHTML;
   }
 
-  function formatISODate(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
+  function formatISO(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
 
-  function formatShortDate(d) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${months[d.getMonth()]} ${d.getDate()}`;
+  function formatDate(d) {
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
   }
 
-  function formatDateTime(d) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const h = d.getHours();
-    const m = String(d.getMinutes()).padStart(2, '0');
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = h % 12 || 12;
-    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${h12}:${m} ${ampm}`;
-  }
+  // ── Boot ──────────────────────────────────
 
-  // ── Init ───────────────────────────────────
-
-  // ── Theme Toggle ───────────────────────────
-
-  let _themeState = 'light';
-  function _ls() { try { return window.localStorage; } catch(e) { return null; } }
-
-  function initTheme() {
-    const ls = _ls();
-    const saved = ls ? ls.getItem('hq_theme') : null;
-    if (saved === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      _themeState = 'dark';
-    }
-
-    const btn = document.getElementById('theme-toggle');
-    if (btn) {
-      btn.addEventListener('click', function () {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        if (isDark) {
-          document.documentElement.removeAttribute('data-theme');
-          _themeState = 'light';
-          try { var s = _ls(); if(s) s.setItem('hq_theme', 'light'); } catch(e) {}
-        } else {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          _themeState = 'dark';
-          try { var s = _ls(); if(s) s.setItem('hq_theme', 'dark'); } catch(e) {}
-        }
-      });
-    }
-  }
-
-  // ── Prompt Bar ─────────────────────────────
-
-  function initPromptBar() {
-    const form = document.getElementById('prompt-form');
-    const input = document.getElementById('prompt-input');
-    if (!form || !input) return;
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const msg = input.value.trim();
-      if (!msg) return;
-
-      // Build Perplexity Computer URL with the prompt pre-filled
-      const baseUrl = 'https://www.perplexity.ai/search/new';
-      const params = new URLSearchParams({ q: msg, mode: 'concierge' });
-      const url = baseUrl + '?' + params.toString();
-
-      // Open in new tab
-      window.open(url, '_blank');
-
-      // Clear input
-      input.value = '';
-    });
-  }
-
-  // ── Init ───────────────────────────────────
-
-  document.addEventListener('DOMContentLoaded', function () {
-    initTheme();
-    initGate();
-    initPromptBar();
-  });
+  document.addEventListener('DOMContentLoaded', initGate);
 
 })();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HQ</title>
+  <title>Mission Control</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,113 +16,89 @@
   <!-- Password Gate -->
   <div id="gate" class="gate">
     <div class="gate-inner">
-      <span class="gate-label">HQ</span>
+      <span class="gate-label">Mission Control</span>
       <form id="gate-form" autocomplete="off">
-        <input
-          type="text"
-          id="gate-input"
-          placeholder="••••••••"
-          autocomplete="off"
-          spellcheck="false"
-          data-lpignore="true"
-          data-1p-ignore
-          style="-webkit-text-security: disc;"
-        >
+        <input type="text" id="gate-input" placeholder="••••••••" autocomplete="off" spellcheck="false" data-lpignore="true" data-1p-ignore style="-webkit-text-security: disc;">
         <div id="gate-error" class="gate-error"></div>
       </form>
     </div>
   </div>
 
-  <!-- Dashboard -->
-  <div id="dashboard" class="dashboard hidden">
+  <!-- App -->
+  <div id="app" class="app hidden">
 
     <!-- Header -->
     <header class="header">
-      <div class="header-left">
-        <span class="header-hq">HQ</span>
-      </div>
-      <div class="header-right">
-        <span id="last-updated" class="header-updated"></span>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-          <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
+      <div class="header-top">
+        <div class="header-left">
+          <button id="back-btn" class="back-btn hidden" aria-label="Back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="header-text">
+            <span class="header-title">Mission Control</span>
+            <span class="header-subtitle">30 days to close a $50K-100K MXN client</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="tab-switcher" id="tab-switcher">
+            <button class="tab-btn active" data-tab="blocks">Blocks</button>
+            <button class="tab-btn" data-tab="dashboard">Dashboard</button>
+          </div>
+          <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
       </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main">
+    <!-- ====== BLOCKS TAB (default) ====== -->
+    <main id="view-blocks" class="main">
 
-      <!-- Progress Log -->
-      <section class="section" id="section-progress">
-        <h2 class="section-title">Activity Log</h2>
-        <div id="progress-log"></div>
-      </section>
+      <!-- Mission Hero -->
+      <section id="mission-hero" class="mission-hero"></section>
 
-      <!-- Key Dates -->
-      <section class="section" id="section-dates">
-        <h2 class="section-title">Key Dates</h2>
-        <div id="timeline" class="timeline"></div>
-      </section>
+      <!-- Project List -->
+      <section id="project-list" class="project-list"></section>
 
-      <!-- Articles -->
-      <section class="section" id="section-articles">
-        <h2 class="section-title">Articles</h2>
-        <div id="articles" class="articles-grid"></div>
-      </section>
+      <!-- Focus Mode -->
+      <section id="focus-mode" class="focus-mode hidden"></section>
 
-      <!-- Content Queue -->
-      <section class="section" id="section-queue">
-        <h2 class="section-title">Content Queue</h2>
-        <div id="content-queue"></div>
-      </section>
+    </main>
+
+    <!-- ====== DASHBOARD TAB ====== -->
+    <main id="view-dashboard" class="main hidden">
 
       <!-- Pipeline -->
-      <section class="section" id="section-pipeline">
-        <h2 class="section-title">Pipeline</h2>
-        <div id="pipeline"></div>
+      <section class="dash-section">
+        <h2 class="dash-title">Pipeline</h2>
+        <div class="dash-subtitle" id="pipeline-total"></div>
+        <div id="pipeline-cards" class="pipeline-scroll"></div>
       </section>
 
-      <!-- Active Clients -->
-      <section class="section" id="section-clients">
-        <h2 class="section-title">Active Clients</h2>
-        <div id="clients" class="clients-grid"></div>
+      <!-- Content Cadence -->
+      <section class="dash-section">
+        <h2 class="dash-title">Content Cadence</h2>
+        <div id="cadence-grid" class="cadence-table-wrap"></div>
       </section>
 
-      <!-- Ideas -->
-      <section class="section" id="section-ideas">
-        <h2 class="section-title">Ideas</h2>
-        <div id="ideas"></div>
-      </section>
-
-      <!-- Team -->
-      <section class="section" id="section-team">
-        <h2 class="section-title">Team</h2>
-        <div id="team" class="team-grid"></div>
+      <!-- Client Hunting -->
+      <section class="dash-section">
+        <h2 class="dash-title">Client Hunting</h2>
+        <div id="platforms" class="platforms-grid"></div>
       </section>
 
     </main>
 
-    <footer class="footer">
-      <span class="footer-text">Mission Control</span>
+    <!-- Numbers Footer -->
+    <footer id="numbers-footer" class="numbers-footer">
+      <div class="numbers-inner">
+        <div class="number-item"><span class="number-label">MRR</span><span class="number-value" id="num-mrr"></span></div>
+        <div class="number-item"><span class="number-label">Pipeline</span><span class="number-value" id="num-pipeline"></span></div>
+        <div class="number-item"><span class="number-label">Costs</span><span class="number-value" id="num-costs"></span></div>
+        <div class="number-item"><span class="number-label">Days Left</span><span class="number-value" id="num-days"></span></div>
+      </div>
     </footer>
-
-    <!-- Prompt Bar -->
-    <div class="prompt-bar">
-      <form id="prompt-form" class="prompt-form" autocomplete="off">
-        <input
-          type="text"
-          id="prompt-input"
-          class="prompt-input"
-          placeholder="Talk to [P]..."
-          autocomplete="off"
-          spellcheck="false"
-        >
-        <button type="submit" class="prompt-send" aria-label="Send">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-      </form>
-    </div>
 
   </div>
 

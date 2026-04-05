@@ -1,204 +1,218 @@
 {
-  "last_updated": "2026-04-02T06:14:00-06:00",
-  "articles": [
-    {
-      "id": 1,
-      "title": "La Carrera de la IA es un Ciclo",
-      "status": "published",
-      "version": "v3.1",
-      "url": "https://luisracosta.com/la-carrera-de-la-ia-es-un-ciclo.html",
-      "preview_url": "preview/la-carrera-de-la-ia-es-un-ciclo.html",
-      "words": 2100,
-      "summary": "Bitcoin cycle framework + Perplexity Computer como ganador del ciclo de agentes. Riesgos expandidos. Teaser a Art. 5.",
-      "file": "article-01-ciclo-v3.md"
-    },
-    {
-      "id": 2,
-      "title": "Cómo Construí Mi Sistema Operativo",
-      "status": "rewritten",
-      "version": "v2",
-      "url": "https://luisracosta.com/como-construi-mi-sistema-operativo.html",
-      "preview_url": "preview/como-construi-mi-sistema-operativo.html",
-      "words": 761,
-      "summary": "La operación interna de EVEN — Perplexity + Manus + Luis como equipo de 3. Reescrito con enfoque más personal.",
-      "notes": "Rewritten in prior session. Pending GitHub push."
-    },
-    {
-      "id": 3,
-      "title": "El Open Source Se Va a Comer al Closed Source",
-      "status": "rewriting",
-      "version": "v1 → v2",
-      "url": "https://luisracosta.com/el-open-source-se-va-a-comer-al-closed-source.html",
-      "preview_url": "preview/el-open-source-se-va-a-comer-al-closed-source.html",
-      "words": 749,
-      "summary": "Por qué open source gana en AI — DeepSeek, Llama, el patrón de Linux repitiéndose.",
-      "notes": "Research data gathered: MMLU gap closed to zero, coding gap remains (SWE-bench), DeepSeek V4 50x cheaper than Claude, open source market $35-56B. Rewrite in progress."
-    },
-    {
-      "id": 4,
-      "title": "Por Qué Construimos Diferente",
-      "status": "rewriting",
-      "version": "v1 → v2",
-      "url": "https://luisracosta.com/por-que-construimos-diferente.html",
-      "preview_url": "preview/por-que-construimos-diferente.html",
-      "words": 723,
-      "summary": "La filosofía de EVEN — construir diferente. Small-team economics + real cost data.",
-      "notes": "Research data gathered: AI-native agencies 60-80% cheaper, traditional redesign $42.5K vs AI-native $8-25K, solo founders 36.3%, 10-50x capital efficiency. Rewrite in progress."
-    },
-    {
-      "id": 5,
-      "title": "¿Los Gigantes Mandan?",
-      "status": "rewritten",
-      "version": "v2",
-      "url": null,
-      "preview_url": "preview/los-gigantes-mandan.html",
-      "words": 2067,
-      "subtitle": "Apple, el silencio calculado, y lo que viene en WWDC 2026",
-      "summary": "REWRITTEN: $650B capex spend across 5 giants, capital gravity thesis, each giant's AI strategy, 'context as leverage' closing. Pending GitHub push + approval."
-    },
-    {
-      "id": 6,
-      "title": "El OS que se Construye Solo",
-      "status": "pending_review",
-      "version": "v1",
-      "url": null,
-      "preview_url": "preview/el-os-que-se-construye-solo.html",
-      "words": 1951,
-      "subtitle": "Lifestyle OS y el futuro del software personal",
-      "summary": "Luis's Lifestyle OS vision — software that builds around you, not the other way around. Agentic onboarding, computer-person metric, the process over the product."
-    },
-    {
-      "id": 7,
-      "title": "La Paradoja del Modelo Abierto",
-      "status": "brief",
-      "version": "v0",
-      "url": null,
-      "preview_url": "preview/la-paradoja-del-modelo-abierto.html",
-      "words": 499,
-      "subtitle": "Open source vs. closed source en la carrera de la IA",
-      "summary": "La tensión entre open-source y closed-source AI. ¿Está destinado el open-source a siempre ir 6 meses detrás?"
-    },
-    {
-      "id": 8,
-      "title": "El Territorio Cambió",
-      "status": "rewritten",
-      "version": "v2",
-      "url": "https://luisracosta.com/el-territorio-cambio.html",
-      "preview_url": "preview/el-territorio-cambio.html",
-      "words": 1200,
-      "summary": "REWRITTEN: 280x inference cost drop, GPT-4 training cost data, solo founder stats (36.3%), Midjourney/Pieter Levels examples, Mérida-specific closing. Pending GitHub push."
-    },
-    {
-      "id": 9,
-      "title": "Caballos Salvajes",
-      "status": "published",
-      "version": "v1",
-      "url": "https://luisracosta.com/caballos-salvajes.html",
-      "preview_url": "preview/caballos-salvajes.html",
-      "words": 800,
-      "summary": "Origin piece. Pure story voice — Luis's personal narrative. Reviewed, stays as-is. No data treatment needed."
-    }
-  ],
-  "content_queue": [
-    {
-      "type": "github_push",
-      "title": "Push All Rewrites to GitHub",
-      "status": "pending",
-      "scheduled": null,
-      "description": "Push 4 rewritten articles to even-admin/luisramirez-site: los-gigantes-mandan, el-territorio-cambio, como-construi-mi-sistema-operativo, + 2 remaining rewrites once complete."
-    },
-    {
-      "type": "ig_stories",
-      "title": "Article Launch — IG Stories",
-      "status": "ready",
-      "scheduled": "2026-04-02T19:00:00-06:00",
-      "description": "2 stories: (1) Personal declaration + article tease, (2) Drop to financieros/analistas/empresarios with link to cycle article."
-    }
-  ],
-  "pipeline": {
-    "total_value": "$350K MXN",
-    "breakdown": [
-      {
-        "client": "Terra 58",
-        "contact": "JP (luisitoramac@gmail.com)",
-        "value": "$150K MXN",
-        "status": "awaiting_confirmation",
-        "notes": "Product brief PDF ready. WhatsApp message drafted. No response from JP this week — follow up Monday."
-      },
-      {
-        "client": "SETY",
-        "contact": "TBD",
-        "value": "$200K MXN (20 prospects × $10K)",
-        "status": "early_stage",
-        "notes": "20 prospective clients for Mérida event April 11-12. Registration form shared March 17."
-      }
+  "last_updated": "2026-04-05T12:00:00-06:00",
+  "mission": {
+    "target": "Close a $50K-100K MXN project",
+    "deadline": "2026-05-05",
+    "weeks": [
+      {"num": 1, "name": "Foundation", "start": "2026-04-06", "end": "2026-04-12"},
+      {"num": 2, "name": "Visibility", "start": "2026-04-13", "end": "2026-04-19"},
+      {"num": 3, "name": "Pipeline", "start": "2026-04-20", "end": "2026-04-26"},
+      {"num": 4, "name": "Close", "start": "2026-04-27", "end": "2026-05-05"}
     ]
   },
-  "clients": [
+  "projects": [
     {
-      "name": "Dr. Ramírez",
-      "type": "retainer",
-      "value": "$12K/mes",
-      "status": "active",
-      "website": "https://drluisramirezlopez.com",
-      "notes": "GHL workflows deployed. Website live. Patient comms via WhatsApp only."
+      "id": "close-client",
+      "name": "Close a $50-100K Client",
+      "deadline": "2026-05-05",
+      "blocks": [
+        {
+          "id": "foundation",
+          "name": "Foundation",
+          "week": 1,
+          "tasks": [
+            {"id": "t1", "text": "Fix Dr. Ramirez Google review link in GHL", "tag": "client"},
+            {"id": "t2", "text": "Publish first 5 tweets on X", "tag": "content"},
+            {"id": "t3", "text": "WhatsApp JP — check-in on Terra 58", "tag": "outreach"},
+            {"id": "t4", "text": "Add newsletter signup to luisracosta.com", "tag": "setup"},
+            {"id": "t5", "text": "Update GitHub profile README", "tag": "setup"},
+            {"id": "t6", "text": "Publish fold.mx first IG batch", "tag": "content"}
+          ]
+        },
+        {
+          "id": "visibility",
+          "name": "Visibility",
+          "week": 2,
+          "tasks": [
+            {"id": "t7", "text": "Write Dr. Ramirez case study", "tag": "content"},
+            {"id": "t8", "text": "Publish case study on LinkedIn", "tag": "content"},
+            {"id": "t9", "text": "Write anchor piece #1 for blog", "tag": "content"},
+            {"id": "t10", "text": "Set up HubSpot CRM", "tag": "setup"},
+            {"id": "t11", "text": "Send warm outreach to 5 targets", "tag": "outreach"}
+          ]
+        },
+        {
+          "id": "pipeline",
+          "name": "Pipeline",
+          "week": 3,
+          "tasks": [
+            {"id": "t12", "text": "Second touch on all 5 outreach contacts", "tag": "outreach"},
+            {"id": "t13", "text": "Outreach to 5 more targets from ICP list", "tag": "outreach"},
+            {"id": "t14", "text": "Write anchor piece #2", "tag": "content"},
+            {"id": "t15", "text": "Send newsletter #1", "tag": "content"},
+            {"id": "t16", "text": "Do free AI audit call if any lead is warm", "tag": "outreach"}
+          ]
+        },
+        {
+          "id": "close",
+          "name": "Close",
+          "week": 4,
+          "tasks": [
+            {"id": "t17", "text": "Follow up on all proposals sent", "tag": "outreach"},
+            {"id": "t18", "text": "Ask Dr. Ramirez for referrals", "tag": "outreach"},
+            {"id": "t19", "text": "Ask Servimueble/Diego for referrals", "tag": "outreach"},
+            {"id": "t20", "text": "Write anchor piece #3", "tag": "content"},
+            {"id": "t21", "text": "Send newsletter #2", "tag": "content"}
+          ]
+        }
+      ]
     },
     {
-      "name": "Servimueble",
-      "type": "retainer",
-      "value": "$12K/mes",
-      "status": "active",
-      "notes": "Active retainer. Running steady."
+      "id": "website-upgrade",
+      "name": "luisracosta.com Upgrade",
+      "deadline": "2026-04-12",
+      "blocks": [
+        {
+          "id": "structure",
+          "name": "Page Structure",
+          "week": 1,
+          "tasks": [
+            {"id": "w1", "text": "Add service cards section (AI Systems, fCTO, Digital Transformation)", "tag": "setup"},
+            {"id": "w2", "text": "Add stack grid section", "tag": "setup"},
+            {"id": "w3", "text": "Fix article links (currently broken)", "tag": "setup"},
+            {"id": "w4", "text": "Add newsletter signup form", "tag": "setup"}
+          ]
+        },
+        {
+          "id": "content",
+          "name": "Content",
+          "week": 1,
+          "tasks": [
+            {"id": "w5", "text": "Write case study from Dr. Ramirez project", "tag": "content"},
+            {"id": "w6", "text": "Add Elsewhere links (X, LinkedIn, GitHub, fold.mx)", "tag": "setup"},
+            {"id": "w7", "text": "Update contact to contacto@luisracosta.com + WhatsApp", "tag": "setup"},
+            {"id": "w8", "text": "Add footer", "tag": "setup"}
+          ]
+        },
+        {
+          "id": "launch",
+          "name": "Launch",
+          "week": 2,
+          "tasks": [
+            {"id": "w9", "text": "Review full site on mobile", "tag": "review"},
+            {"id": "w10", "text": "Push to GitHub Pages", "tag": "setup"},
+            {"id": "w11", "text": "Share link on X and LinkedIn", "tag": "content"}
+          ]
+        }
+      ]
     },
     {
-      "name": "WKS",
-      "type": "project",
-      "value": "TBD",
-      "status": "proposal_sent",
-      "notes": "Auditoría + propuesta + concepto web sent March 25. Awaiting response."
-    }
-  ],
-  "ideas": [
+      "id": "fold-launch",
+      "name": "fold.mx Launch",
+      "deadline": "2026-04-19",
+      "blocks": [
+        {
+          "id": "stage-content",
+          "name": "Stage Content",
+          "week": 1,
+          "tasks": [
+            {"id": "f1", "text": "Publish first 3 IG posts (cover + deepdive)", "tag": "content"},
+            {"id": "f2", "text": "Publish first 5 tweets from fold account", "tag": "content"},
+            {"id": "f3", "text": "Push first article live on fold.mx", "tag": "content"},
+            {"id": "f4", "text": "Set up fold newsletter signup", "tag": "setup"},
+            {"id": "f5", "text": "Post IG stories (3 launch stories)", "tag": "content"}
+          ]
+        },
+        {
+          "id": "cadence",
+          "name": "Hit Cadence",
+          "week": 2,
+          "tasks": [
+            {"id": "f6", "text": "3 IG posts this week", "tag": "content"},
+            {"id": "f7", "text": "5 tweets this week", "tag": "content"},
+            {"id": "f8", "text": "1 article published", "tag": "content"},
+            {"id": "f9", "text": "Newsletter #1 sent", "tag": "content"}
+          ]
+        }
+      ]
+    },
     {
-      "title": "Lifestyle OS / Vibe OS",
-      "status": "developing",
-      "summary": "Agentic OS that builds itself around you. Onboarding → agents collect data → optimize all life areas. Target: young entrepreneurs, tech-savvy CEOs. Model: build the PROCESS for agents to build your OS, not the software itself. Computer-person metric as the next paradigm.",
-      "origin": "Luis voice note, April 1 2026",
-      "has_article": true,
-      "article_id": 6
-    }
-  ],
-  "team": {
-    "members": [
-      {"name": "Luis", "role": "CEO / Director", "tag": "[L]"},
-      {"name": "Perplexity Computer", "role": "Researcher, Analyst, Writer, Programmer", "tag": "[P]"},
-      {"name": "Manus", "role": "Database, Backend Ops", "tag": "[M]"}
-    ],
-    "slack_channel": "#all-agentic-comunications-department"
-  },
-  "key_dates": [
-    {"date": "2026-04-02", "event": "IG Stories Launch (7pm scroll time)"},
-    {"date": "2026-04-11", "event": "Mérida Event Day 1 (SETY)"},
-    {"date": "2026-04-12", "event": "Mérida Event Day 2 (SETY)"},
-    {"date": "2026-05-01", "event": "Dubai Trip Start"},
-    {"date": "2026-05-04", "event": "Dubai Trip End"},
-    {"date": "2026-06-08", "event": "Apple WWDC 2026"}
-  ],
-  "progress_log": [
-    {
-      "date": "2026-04-01",
-      "agent": "[P]",
-      "entries": [
-        "Tone audit completed — 9 articles reviewed against writing guide, 6 clean, 3 flagged",
-        "Los Gigantes Mandan — REWRITTEN with $650B capex data, 5 giants' strategies, capital gravity thesis",
-        "El Territorio Cambió — REWRITTEN with 280x cost drop, solo founder data, hardware efficiency stats",
-        "Caballos Salvajes — Reviewed, stays as-is (origin piece, pure story voice)",
-        "Research data gathered for El Open Source + Por Qué Construimos Diferente",
-        "Terra 58 product brief PDF finalized, WhatsApp message drafted for JP",
-        "Mission Control HQ redesigned — black and white, matching luisracosta.com",
-        "Monday briefing cron active",
-        "HQ updated: Activity Log, article statuses, read links, preview system for all articles"
+      "id": "dr-ramirez-upgrade",
+      "name": "Dr. Ramirez — Drop GHL, Set Up Cal.com",
+      "deadline": "2026-04-12",
+      "blocks": [
+        {
+          "id": "setup-calcom",
+          "name": "Set Up Cal.com",
+          "week": 1,
+          "tasks": [
+            {"id": "d1", "text": "Sign up for Cal.com ($12/mo hosted)", "tag": "setup"},
+            {"id": "d2", "text": "Create event type: Consulta Neurocirugia (30 min, 2 locations)", "tag": "setup"},
+            {"id": "d3", "text": "Connect Dr.'s Google Calendar for availability sync", "tag": "setup"},
+            {"id": "d4", "text": "Set up email workflows: confirmation + 2-day reminder + day-of reminder", "tag": "setup"},
+            {"id": "d5", "text": "Get real Google Review link from Google Maps", "tag": "client"}
+          ]
+        },
+        {
+          "id": "whatsapp-embed",
+          "name": "WhatsApp + Website Embed",
+          "week": 1,
+          "tasks": [
+            {"id": "d6", "text": "Set up WhatsApp notification webhook (Cal.com -> Dr.'s phone)", "tag": "setup"},
+            {"id": "d7", "text": "Embed Cal.com booking widget on dr-luis-merida website", "tag": "setup"},
+            {"id": "d8", "text": "Set up post-visit follow-up email with working Google Review link", "tag": "setup"},
+            {"id": "d9", "text": "Test full flow: book -> confirm -> remind -> WhatsApp Dr.", "tag": "review"},
+            {"id": "d10", "text": "Cancel GHL subscription ($97/mo saved)", "tag": "setup"}
+          ]
+        }
       ]
     }
-  ]
+  ],
+  "pipeline": [
+    {"name": "Terra 58", "value": "$150K MXN", "status": "waiting", "note": "Awaiting JP confirmation", "type": "project"},
+    {"name": "SETY", "value": "$200K MXN", "status": "paused", "note": "On hold — 20 prospects x $10K", "type": "project"},
+    {"name": "Dr. Ramirez", "value": "$12K/mes", "status": "active", "note": "Active retainer", "type": "retainer"},
+    {"name": "Servimueble", "value": "$12K/mes", "status": "active", "note": "Diego manages", "type": "retainer"}
+  ],
+  "content_cadence": {
+    "channels": ["X/Twitter", "LinkedIn", "Newsletter", "Instagram", "Blog", "Reviews"],
+    "brands": {
+      "luisracosta.com": {
+        "X/Twitter": {"target": 5, "done": 0, "period": "week"},
+        "LinkedIn": {"target": 2, "done": 0, "period": "week"},
+        "Newsletter": {"target": 1, "done": 0, "period": "month", "status": "not_started"},
+        "Instagram": null,
+        "Blog": {"target": 1, "done": 0, "period": "month"},
+        "Reviews": null
+      },
+      "fold.mx": {
+        "X/Twitter": {"target": 3, "done": 0, "period": "week"},
+        "LinkedIn": null,
+        "Newsletter": {"target": 1, "done": 0, "period": "month", "status": "not_started"},
+        "Instagram": {"target": 3, "done": 0, "period": "week"},
+        "Blog": {"target": 1, "done": 0, "period": "month"},
+        "Reviews": null
+      },
+      "Dr. Ramirez": {
+        "X/Twitter": null,
+        "LinkedIn": null,
+        "Newsletter": null,
+        "Instagram": null,
+        "Blog": null,
+        "Reviews": {"target": 1, "done": 0, "period": "week", "status": "blocked", "note": "Link broken"}
+      }
+    }
+  },
+  "platforms": [
+    {"name": "Upwork", "action": "Bid on AI/vibe coding projects", "url": "https://upwork.com"},
+    {"name": "LinkedIn", "action": "Publish & connect with founders", "url": "https://linkedin.com"},
+    {"name": "vibecoding.work", "action": "AI-native developer jobs", "url": "https://vibecoding.work"},
+    {"name": "Arc.dev", "action": "Fractional CTO matching", "url": "https://arc.dev"},
+    {"name": "Fractional Jobs", "action": "List yourself as fCTO", "url": "https://fractionaljobs.io"}
+  ],
+  "numbers": {
+    "mrr": "$24K MXN",
+    "pipeline_total": "$350K MXN",
+    "costs": "~$532 USD/mo"
+  }
 }

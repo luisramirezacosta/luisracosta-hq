@@ -607,6 +607,289 @@ a.thinking-item .thinking-title {
 }
 
 /* ============================================
+   Hero — Founder line
+   ============================================ */
+
+.hero-founder {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-faint);
+  letter-spacing: 0.02em;
+  margin-top: var(--space-3);
+}
+
+.hero-founder a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  text-decoration-color: var(--color-text-faint);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.hero-founder a:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+/* ============================================
+   Background
+   ============================================ */
+
+.background-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12);
+}
+
+.background-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--color-text);
+  margin-bottom: var(--space-5);
+}
+
+.background-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.background-list li {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.background-list a {
+  color: var(--color-text);
+  text-decoration-color: var(--color-text-faint);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.background-list a:hover {
+  text-decoration-color: var(--color-text);
+}
+
+/* ============================================
+   The Setup
+   ============================================ */
+
+.setup-subtext {
+  font-size: var(--text-sm);
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-8);
+}
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+.setup-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.setup-card-title {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-text);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.setup-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.setup-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.setup-item-name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.setup-item-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  line-height: 1.4;
+}
+
+/* ============================================
+   EVEN Card
+   ============================================ */
+
+.even-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+}
+
+.even-text {
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: var(--space-4);
+  max-width: 50ch;
+}
+
+.even-link {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  text-decoration-color: var(--color-text-faint);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  display: inline-block;
+  margin-bottom: var(--space-3);
+}
+
+.even-link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-text);
+}
+
+.even-note {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+}
+
+/* ============================================
+   Newsletter
+   ============================================ */
+
+.newsletter-subtext {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-6);
+  max-width: 45ch;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: var(--space-3);
+  max-width: 420px;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--transition-interactive);
+}
+
+.newsletter-input:focus {
+  border-color: var(--color-text-faint);
+}
+
+.newsletter-input::placeholder {
+  color: var(--color-text-faint);
+}
+
+.newsletter-btn {
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-primary);
+  color: var(--color-bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity var(--transition-interactive);
+  white-space: nowrap;
+}
+
+.newsletter-btn:hover {
+  opacity: 0.85;
+}
+
+.newsletter-success {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ============================================
+   Contact — WhatsApp line
+   ============================================ */
+
+.contact-whatsapp {
+  font-size: var(--text-sm);
+  color: var(--color-text-faint);
+  margin-top: var(--space-3);
+}
+
+.contact-whatsapp a {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.contact-whatsapp a:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+/* ============================================
+   Footer — updated
+   ============================================ */
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.footer-right {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.footer-link {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  text-decoration: none;
+  transition: color var(--transition-interactive);
+}
+
+.footer-link:hover {
+  color: var(--color-text-muted);
+}
+
+/* ============================================
    Responsive
    ============================================ */
 
@@ -618,6 +901,19 @@ a.thinking-item .thinking-title {
 
   .header-nav {
     gap: var(--space-4);
+  }
+
+  .background-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .setup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .newsletter-form {
+    flex-direction: column;
   }
 
   .elsewhere-links {
