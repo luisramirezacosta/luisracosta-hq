@@ -1,25 +1,42 @@
 {
   "name": "luisracosta-hq",
-  "mission": "Build and maintain Luis Alberto Ramírez Acosta's digital ecosystem — personal brand, content authority, and operational intelligence dashboard. Every artifact should reinforce Luis's position as an AI-native technical co-founder serving Mexico/LatAm.",
+  "mission": "Run Luis Ramirez Acosta's personal brand marketing operation on autopilot. Produce content, grow presence, and generate inbound interest for FIRMA23 (AI-native Technical Co-Founder as a Service) — without Luis spending hours writing, posting, researching, or doing outreach. The content sells the thinking. The thinking sells the offer.",
   "goals": [
-    "Publish and maintain luisracosta.com as a world-class personal authority site",
-    "Keep Mission Control HQ updated as the real-time operational dashboard",
-    "Produce one high-quality article per week (research-backed, Luis's voice)",
-    "Prepare newsletter infrastructure for launch",
-    "Maintain knowledge base as the single source of truth about Luis and EVEN"
+    "Publish 3-4 tweets per week on X (español mexicano, Luis's voice)",
+    "Publish 2 LinkedIn posts per week (professional tone, same voice)",
+    "Publish 1 long-form article per month on luisracosta.com",
+    "Research trending AI/tech topics weekly to fuel content pipeline",
+    "Maintain and update luisracosta.com with new articles and content",
+    "Build landing pages when needed for events or campaigns",
+    "Grow X and LinkedIn followers through quality content, not growth hacks"
+  ],
+  "constraints": [
+    "NEVER sell. NEVER pitch. NEVER use copywriting frameworks.",
+    "If it looks like an ad, it's wrong. If it sounds like thinking out loud, it's right.",
+    "ALL external content in español mexicano. Internal docs can be English.",
+    "NO AI-generated images. Real photos only.",
+    "No content goes live without board (Luis) approval.",
+    "Credits aren't free — be efficient. Don't spawn unnecessary work."
   ],
   "budget": {
     "monthly_cap_usd": 200,
     "model": "claude-sonnet-4",
-    "notes": "Claude Max subscription. Budget is shared across all agents in this company. Perplexity Computer operates outside this budget."
+    "notes": "Claude Max subscription inference. Perplexity Computer ($200/mo) operates outside this budget as the external intelligence/research layer."
   },
   "board": [
     {
       "name": "Luis Alberto Ramírez Acosta",
-      "role": "Founder / Board",
-      "contact": "WhatsApp, Slack #all-agentic-comunications-department"
+      "role": "Founder / Board / Final Approver",
+      "contact": "Slack #all-agentic-comunications-department, WhatsApp for urgent"
+    }
+  ],
+  "external_partners": [
+    {
+      "name": "Perplexity Computer",
+      "code": "[P]",
+      "role": "Strategy, deep research, data gathering, article research briefs, competitive intelligence. NOT inside Paperclip — feeds work into the system via files and briefs."
     }
   ],
   "created": "2026-04-04",
-  "version": "1.0"
+  "version": "2.0"
 }

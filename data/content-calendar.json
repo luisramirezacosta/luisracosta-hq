@@ -1,0 +1,79 @@
+{
+  "current_week": "2026-04-06",
+  "status": "planning",
+  "weeks": [
+    {
+      "week_of": "2026-04-06",
+      "theme": "First week — establish rhythm, test voice calibration",
+      "tweets": [
+        {
+          "id": "t-w1-01",
+          "pillar": "futuro-computacion",
+          "topic": "The computer that acts without being asked — what changes when the OS disappears",
+          "status": "queued",
+          "target_day": "Tuesday"
+        },
+        {
+          "id": "t-w1-02",
+          "pillar": "ia-economia-real",
+          "topic": "The gap between AI demos and the 40-person company trying to use it",
+          "status": "queued",
+          "target_day": "Wednesday"
+        },
+        {
+          "id": "t-w1-03",
+          "pillar": "disciplina",
+          "topic": "What training at 5am teaches you about building — short observation",
+          "status": "queued",
+          "target_day": "Thursday"
+        },
+        {
+          "id": "t-w1-04",
+          "pillar": "industria",
+          "topic": "Something timely from this week's AI/tech news (research needed from [P])",
+          "status": "needs_research",
+          "target_day": "Friday"
+        }
+      ],
+      "linkedin": [
+        {
+          "id": "li-w1-01",
+          "pillar": "ia-economia-real",
+          "topic": "Why the hardest AI problems aren't in San Francisco — they're in businesses with 15 years of implicit rules",
+          "status": "queued",
+          "target_day": "Tuesday"
+        },
+        {
+          "id": "li-w1-02",
+          "pillar": "futuro-computacion",
+          "topic": "The next OS won't have a home screen — it'll have a context engine",
+          "status": "queued",
+          "target_day": "Thursday"
+        }
+      ],
+      "article": {
+        "id": "art-03-rewrite",
+        "title": "El Open Source Se Va a Comer al Closed Source",
+        "status": "rewriting",
+        "notes": "Research data already gathered. Rewrite in progress."
+      }
+    }
+  ],
+  "upcoming_events": [
+    {
+      "date": "2026-04-11",
+      "event": "Mérida event",
+      "content_opportunity": "Pre-event tweet about Yucatán tech, post-event reflection"
+    },
+    {
+      "date": "2026-05-01",
+      "event": "Dubai trip",
+      "content_opportunity": "Global perspective tweets, LatAm vs Middle East tech"
+    },
+    {
+      "date": "2026-06-08",
+      "event": "Apple WWDC",
+      "content_opportunity": "Major content moment — live commentary tweets, article on what Apple announces for agentic computing"
+    }
+  ]
+}
