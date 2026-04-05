@@ -137,15 +137,118 @@ Simple link cards, external links open in new tab.
 - Don't use any external JS libraries (vanilla JS only)
 - Don't add authentication beyond the existing password gate
 
-## Files to Modify
+## Files to Modify (HQ)
 
 - `packages/hq/index.html` — rebuild dashboard HTML
 - `packages/hq/style.css` — update styles for new sections
 - `packages/hq/app.js` — rebuild dashboard logic
 - `packages/hq/data/state.json` — new data structure
 
+---
+
+# PART 2: luisracosta.com — Personal Site Upgrade
+
+## Current State
+
+The site at `packages/website/` is a bare single page: name, one paragraph, article titles (not linked), an "Elsewhere" heading with nothing under it, and an email. No one landing here knows what to hire Luis for, sees proof of work, or can give their email.
+
+## What To Build
+
+Keep the same design system (Instrument Serif + Satoshi, B&W, minimal editorial). Keep the existing style.css and base.css — they're the source of truth. This is NOT a redesign. It's adding the missing sections that turn a name card into a client acquisition page.
+
+### 1. HERO (update existing header)
+Keep: "Luis Alberto Ramirez Acosta" in Instrument Serif.
+Change tagline to: "I build AI-powered systems for businesses. Fractional CTO. Mérida, MX."
+Add one line below in muted: "CEO @ EVEN Venture Studio — turning local businesses into AI-native operations."
+
+### 2. WHAT I DO (rewrite)
+Replace current paragraph with 3 clear service cards in a row:
+- **AI Systems** — "Custom automation, CRM integration, agent orchestration for your business."
+- **Fractional CTO** — "Technical leadership on demand. Architecture, stack, team, ship."
+- **Digital Transformation** — "From zero digital presence to a full operating system. Website, booking, follow-ups, reviews."
+
+Each card: white background, subtle border, rounded-2xl, no shadow. Same card style as HQ.
+
+### 3. CASE STUDY (new section)
+Heading: "Proof" in Instrument Serif.
+One featured case study card (placeholder until real data arrives):
+- Client: "Neurosurgery Practice — Mérida"
+- Challenge: "Zero digital presence. All patients via word-of-mouth."
+- What we built: "Professional website, automated appointment booking, patient follow-up system, Google review collection."
+- Result: "[Results coming — placeholder for now]"
+- Visual: simple before/after layout or a clean quote card
+
+This section will be updated once we have real metrics from Dr. Ramírez.
+
+### 4. STACK (new section)
+Heading: "Stack" in Instrument Serif.
+Show the tools/tech Luis works with. Simple grid of small cards or a clean list:
+- Perplexity AI — Strategy & Intelligence
+- Claude / Claude Code — Development
+- React + Next.js + Tailwind — Frontend
+- Supabase / PostgreSQL — Backend
+- GoHighLevel — Client CRM & Automation
+- HubSpot — Pipeline Management
+- GitHub — Version Control & CI/CD
+- Paperclip — Agent Orchestration
+
+Clean, minimal. No logos needed. Just text in a grid. Muted descriptions.
+
+### 5. THINKING (fix existing)
+The current article titles aren't linked. Fix them:
+- Each article title should link to its published URL on luisracosta.com
+- Show date in muted text
+- Keep the clean list format
+
+Article URLs (from state.json):
+- "La Carrera de la IA es un Ciclo" → /la-carrera-de-la-ia-es-un-ciclo.html
+- "Por Qué Construimos Diferente" → /por-que-construimos-diferente.html
+- "Cómo Construí Mi Sistema Operativo" → /como-construi-mi-sistema-operativo.html
+- "El Territorio Cambió" → /el-territorio-cambio.html
+- "Caballos Salvajes" → /caballos-salvajes.html
+
+### 6. NEWSLETTER SIGNUP (new section — CRITICAL)
+Heading: "Newsletter" in Instrument Serif.
+Subtext: "Ideas sobre IA, tecnología y negocios. Sin spam. Un email cada dos semanas."
+
+Simple form:
+- Email input field + "Suscribirme" button
+- On submit: store email to localStorage for now (we'll wire to Resend/Buttondown later)
+- Success state: "Gracias. Te escribo pronto." replaces the form
+- Clean, minimal form. Same card style. No popup, no modal — inline on the page.
+
+**Future:** This form will POST to an API endpoint. For now, just capture to localStorage and show success. The brief for wiring the backend comes later.
+
+### 7. ELSEWHERE (fix existing)
+Add actual links:
+- X/Twitter — https://x.com/luisracosta (or whatever handle)
+- LinkedIn — https://linkedin.com/in/luisracosta
+- GitHub — https://github.com/even-admin
+- fold.mx — https://fold.mx
+
+Simple text links, subtle hover underline.
+
+### 8. CONTACT (update)
+Replace `luis@evenai.co` with:
+- Email: contacto@luisracosta.com (new Google Workspace)
+- One line: "WhatsApp is faster." with a WhatsApp link (https://wa.me/XXXXXXXXXXX — Luis will fill in number)
+
+### 9. FOOTER (new)
+Simple footer:
+- "© 2026 Luis Alberto Ramirez Acosta"
+- "Mérida, Yucatán, México"
+- Small text links: X, LinkedIn, GitHub
+
+## Files to Modify (Website)
+
+- `packages/website/index.html` — add new sections
+- `packages/website/style.css` — add styles for new components (service cards, newsletter form, stack grid)
+- Keep `packages/website/base.css` untouched
+- Keep all existing article HTML pages untouched
+
 ## Commit & Deploy
 
 - Branch: `main` (push directly)
-- Commit: "hq: rebuild Mission Control — 30-day client close dashboard"
-- Deploy: GitHub Pages serves from packages/hq/ at hq.luisracosta.com
+- Commit 1: "hq: rebuild Mission Control — 30-day client close dashboard"
+- Commit 2: "website: upgrade personal site — services, case study, stack, newsletter signup"
+- Deploy: GitHub Pages serves both from their respective directories
