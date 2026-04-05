@@ -211,6 +211,41 @@ Add to `data/state.json`:
 }
 ```
 
+    {
+      "id": "dr-ramirez-upgrade",
+      "name": "Dr. Ramírez — Drop GHL, Set Up Cal.com",
+      "deadline": "2026-04-12",
+      "blocks": [
+        {
+          "id": "setup-calcom",
+          "name": "Set Up Cal.com",
+          "week": 1,
+          "tasks": [
+            {"id": "d1", "text": "Sign up for Cal.com ($12/mo hosted)", "tag": "setup", "done": false},
+            {"id": "d2", "text": "Create event type: Consulta Neurocirugía (30 min, 2 locations)", "tag": "setup", "done": false},
+            {"id": "d3", "text": "Connect Dr.'s Google Calendar for availability sync", "tag": "setup", "done": false},
+            {"id": "d4", "text": "Set up email workflows: confirmation + 2-day reminder + day-of reminder", "tag": "setup", "done": false},
+            {"id": "d5", "text": "Get real Google Review link from Google Maps", "tag": "client", "done": false}
+          ]
+        },
+        {
+          "id": "whatsapp-embed",
+          "name": "WhatsApp + Website Embed",
+          "week": 1,
+          "tasks": [
+            {"id": "d6", "text": "Set up WhatsApp notification webhook (Cal.com → Dr.'s phone)", "tag": "setup", "done": false},
+            {"id": "d7", "text": "Embed Cal.com booking widget on dr-luis-merida website", "tag": "setup", "done": false},
+            {"id": "d8", "text": "Set up post-visit follow-up email with working Google Review link", "tag": "setup", "done": false},
+            {"id": "d9", "text": "Test full flow: book → confirm → remind → WhatsApp Dr.", "tag": "review", "done": false},
+            {"id": "d10", "text": "Cancel GHL subscription ($97/mo saved)", "tag": "setup", "done": false}
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
 Task completion state is stored in localStorage (keyed by task id). state.json provides the structure, localStorage provides the checkbox state.
 
 ## How [P] and Luis Use This Together
