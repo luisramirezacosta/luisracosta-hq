@@ -26,17 +26,22 @@
   "board": [
     {
       "name": "Luis Alberto Ramírez Acosta",
-      "role": "Founder / Board / Final Approver",
+      "code": "[L]",
+      "role": "Founder / Final Approver / Action",
       "contact": "Slack #all-agentic-comunications-department, WhatsApp for urgent"
-    }
-  ],
-  "external_partners": [
+    },
     {
       "name": "Perplexity Computer",
       "code": "[P]",
-      "role": "Strategy, deep research, data gathering, article research briefs, competitive intelligence. NOT inside Paperclip — feeds work into the system via files and briefs."
+      "role": "Executive Assistant / Strategy / Intelligence / Planning"
+    },
+    {
+      "name": "Claude",
+      "code": "[C]",
+      "role": "Builder / Architect / Board Member with judgment"
     }
   ],
+  "external_partners": [],
   "created": "2026-04-04",
   "version": "2.0"
 }

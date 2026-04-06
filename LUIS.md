@@ -134,13 +134,15 @@ Make.com, Zapier, Manus — not used. Do not reference.
 
 Luis does not plan. He opens HQ, enters a sprint block, and works. Everything else is pre-loaded.
 
-| Role | Who | Responsibility |
-|------|-----|----------------|
-| **[P]** (executive assistant) | Perplexity | Plans everything. Writes briefs for Claude Code. Manages sprint blocks. Monitors email/calendar. Drafts content. Researches ICP. Has next task ready before Luis finishes current one. |
-| **Builder** | Claude Code | Executes well-defined tickets. Builds and deploys code. |
-| **Board** | Luis | Approves. Posts. Sends WhatsApp messages. Takes calls. Closes deals. |
+### The Board
 
-**Monday briefing:** Once, at 8:30 AM CST. One briefing only. No repeats, no follow-ups unless Luis asks.
+| Member | Code | Role |
+|--------|------|------|
+| Luis Alberto Ramírez Acosta | **[L]** | Founder. Final approver. Action — approves, posts, sends WhatsApp, takes calls, closes deals. |
+| Perplexity Computer | **[P]** | Executive assistant. Plans everything. Writes briefs for [C]. Manages sprint blocks. Monitors email/calendar. Drafts content. Researches ICP. Has next task ready before [L] finishes current one. |
+| Claude | **[C]** | Builder and architect. Executes well-defined tickets from [P]. Builds and deploys code, sites, systems. Board member with judgment — not just an executor. |
+
+**Monday briefing:** Once, at 8:30 AM CST. One briefing only. No repeats, no follow-ups unless [L] asks.
 
 ---
 
