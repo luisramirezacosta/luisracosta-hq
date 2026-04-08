@@ -487,6 +487,68 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .reply-copy-btn.copied { background: var(--dot-green); }
 
 /* ============================================
+   SECURITY
+   ============================================ */
+
+.security-status-card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 24px;
+}
+.security-status-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+}
+.security-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+}
+.security-dot.green { background: var(--dot-green); }
+.security-dot.yellow { background: var(--dot-yellow); }
+.security-dot.red { background: var(--dot-red); }
+.security-status-label {
+  font-family: var(--font-body); font-size: 18px; font-weight: 500; color: var(--text);
+}
+.security-meta {
+  display: flex; gap: 24px; margin-bottom: 8px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
+}
+.security-summary {
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary);
+}
+
+.security-todos { display: flex; flex-direction: column; }
+
+.security-todo-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.security-todo-item:last-child { border-bottom: none; }
+
+.security-todo-content {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.security-todo-text { font-size: 14px; color: var(--text); line-height: 1.5; }
+.security-todo-text.is-done { color: var(--text-faint); text-decoration: line-through; }
+
+.urgency-chip {
+  display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  padding: 2px 8px; border-radius: var(--radius-xs); white-space: nowrap;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.urgency-chip.critical { background: rgba(239,68,68,0.12); color: #dc2626; }
+.urgency-chip.high { background: rgba(234,179,8,0.12); color: #ca8a04; }
+.urgency-chip.medium { background: var(--accent-dim); color: var(--text-muted); }
+.urgency-chip.low { background: var(--accent-dim); color: var(--text-faint); }
+
+[data-theme="dark"] .urgency-chip.critical { background: rgba(239,68,68,0.15); color: #f87171; }
+[data-theme="dark"] .urgency-chip.high { background: rgba(234,179,8,0.15); color: #facc15; }
+
+.security-empty {
+  font-family: var(--font-mono); font-size: 13px; color: var(--text-faint);
+  padding: 32px; text-align: center;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+}
+
+/* ============================================
    NUMBERS FOOTER
    ============================================ */
 

@@ -114,6 +114,7 @@
     renderNumbers();
     renderDashboard();
     renderSocials();
+    renderSecurity();
   }
 
   // ── ops.md Parser ─────────────────────────
@@ -225,6 +226,7 @@
     document.getElementById('view-blocks').classList.toggle('hidden', tab !== 'blocks');
     document.getElementById('view-dashboard').classList.toggle('hidden', tab !== 'dashboard');
     document.getElementById('view-socials').classList.toggle('hidden', tab !== 'socials');
+    document.getElementById('view-security').classList.toggle('hidden', tab !== 'security');
   }
 
   // ── Mission Hero ──────────────────────────
@@ -576,6 +578,85 @@
           btn.classList.add('copied');
           setTimeout(function() { btn.textContent = 'Copy reply'; btn.classList.remove('copied'); }, 2000);
         });
+      });
+    });
+  }
+
+  // ── Security ──────────────────────────────
+
+  var SEC_KEY = 'mc_security'; // localStorage overrides for security todos
+
+  var secOverrides = {};
+
+  function loadSecOverrides() {
+    var ls = _ls(); if (!ls) return;
+    try { var raw = ls.getItem(SEC_KEY); if (raw) secOverrides = JSON.parse(raw); } catch(e) {}
+  }
+
+  function saveSecOverrides() {
+    var ls = _ls(); if (!ls) return;
+    try { ls.setItem(SEC_KEY, JSON.stringify(secOverrides)); } catch(e) {}
+  }
+
+  function isSecDone(todo) {
+    if (secOverrides[todo.id] !== undefined) return secOverrides[todo.id];
+    return todo.done;
+  }
+
+  function renderSecurity() {
+    if (!data || !data.security) return;
+    loadSecOverrides();
+    var sec = data.security;
+
+    // Status card
+    var statusEl = document.getElementById('security-status');
+    var dotClass = sec.status === 'healthy' ? 'green' : sec.status === 'warning' ? 'yellow' : 'red';
+    var statusLabel = sec.status.charAt(0).toUpperCase() + sec.status.slice(1);
+
+    statusEl.innerHTML =
+      '<div class="security-status-row">' +
+        '<span class="security-dot ' + dotClass + '"></span>' +
+        '<span class="security-status-label">' + esc(statusLabel) + '</span>' +
+      '</div>' +
+      '<div class="security-meta">' +
+        '<span>Last audit: ' + esc(sec.last_audit) + '</span>' +
+        '<span>Next review: ' + esc(sec.next_audit) + '</span>' +
+      '</div>' +
+      '<div class="security-summary">' + esc(sec.summary) + '</div>';
+
+    // Todo list
+    var todosEl = document.getElementById('security-todos');
+    var todos = (sec.todos || []).slice().sort(function(a, b) {
+      var order = { critical: 0, high: 1, medium: 2, low: 3 };
+      return (order[a.urgency] || 4) - (order[b.urgency] || 4);
+    });
+
+    if (todos.length === 0) {
+      todosEl.innerHTML = '<div class="security-empty">All clear. No pending tasks.</div>';
+      return;
+    }
+
+    todosEl.innerHTML = todos.map(function(todo) {
+      var done = isSecDone(todo);
+      return '<div class="security-todo-item" data-sec-id="' + todo.id + '">' +
+        '<button class="task-checkbox ' + (done ? 'checked' : '') + '" aria-label="Toggle task">' +
+          (done ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '') +
+        '</button>' +
+        '<div class="security-todo-content">' +
+          '<span class="security-todo-text ' + (done ? 'is-done' : '') + '">' + esc(todo.task) + '</span>' +
+          '<span class="urgency-chip ' + esc(todo.urgency) + '">' + esc(todo.urgency) + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Checkbox handlers
+    todosEl.querySelectorAll('.task-checkbox').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var id = btn.closest('.security-todo-item').getAttribute('data-sec-id');
+        secOverrides[id] = !isSecDone(sec.todos.find(function(t) { return t.id === id; }));
+        saveSecOverrides();
+        renderSecurity();
       });
     });
   }

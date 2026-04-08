@@ -98,5 +98,18 @@
         "draft": "El código más caro que existe es el que no debería haberse escrito. Con AI generando más rápido que nunca, saber qué no construir se volvió la habilidad más valiosa del equipo."
       }
     ]
+  },
+  "security": {
+    "last_audit": "2026-04-07",
+    "next_audit": "2026-05-07",
+    "status": "healthy",
+    "summary": "17 findings — 12 fixed, 3 pending, 2 accepted risk",
+    "todos": [
+      {"id": "s1", "task": "Rotate LinkedIn client secret via Developer Portal", "urgency": "critical", "done": false},
+      {"id": "s2", "task": "Move LinkedIn secret to .env (quit Desktop, edit config, relaunch)", "urgency": "high", "done": false},
+      {"id": "s3", "task": "Pin mcp-remote version (same restart)", "urgency": "high", "done": false},
+      {"id": "s4", "task": "Configure git credential helper (osxkeychain)", "urgency": "medium", "done": false},
+      {"id": "s5", "task": "Move security hook debug log out of /tmp", "urgency": "low", "done": false}
+    ]
   }
 }
