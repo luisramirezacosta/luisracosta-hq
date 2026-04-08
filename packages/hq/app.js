@@ -754,36 +754,33 @@
     initFinanceForms();
   }
 
+  // Use YYYY-MM string prefix for month matching (avoids UTC date parsing bugs)
+  function getMonthKey(dateStr) { return dateStr ? dateStr.substring(0, 7) : ''; }
+  function currentMonthKey() { return formatISO(new Date()).substring(0, 7); }
+
+  function toMXN(amount, currency) { return currency === 'MXN' ? amount : amount * USD_MXN; }
+
   function renderFinanceSummary() {
     var el = document.getElementById('finance-summary');
     if (!el) return;
     var income = loadLedger(INCOME_KEY);
     var expenses = loadLedger(EXPENSE_KEY);
+    var curKey = currentMonthKey();
 
-    var now = new Date();
-    var curMonth = now.getMonth();
-    var curYear = now.getFullYear();
-
-    var monthIncome = 0;
+    var monthIncomeMXN = 0;
     income.forEach(function(i) {
-      var d = new Date(i.date);
-      if (d.getMonth() === curMonth && d.getFullYear() === curYear) {
-        monthIncome += i.currency === 'MXN' ? i.amount : i.amount * USD_MXN;
-      }
+      if (getMonthKey(i.date) === curKey) monthIncomeMXN += toMXN(i.amount, i.currency);
     });
 
-    var monthExpenseUSD = 0;
+    var monthExpenseMXN = 0;
     expenses.forEach(function(e) {
-      var d = new Date(e.date);
-      if (d.getMonth() === curMonth && d.getFullYear() === curYear) {
-        monthExpenseUSD += e.currency === 'USD' ? e.amount : e.amount / USD_MXN;
-      }
+      if (getMonthKey(e.date) === curKey) monthExpenseMXN += toMXN(e.amount, e.currency);
     });
 
-    var netMxn = monthIncome - (monthExpenseUSD * USD_MXN);
+    var netMxn = monthIncomeMXN - monthExpenseMXN;
     var cards = [
-      { label: 'Income this month', value: '$' + fmtK(monthIncome) + ' MXN' },
-      { label: 'Expenses this month', value: '$' + Math.round(monthExpenseUSD) + ' USD' },
+      { label: 'Income this month', value: '$' + fmtK(monthIncomeMXN) + ' MXN' },
+      { label: 'Expenses this month', value: '$' + fmtK(monthExpenseMXN) + ' MXN' },
       { label: 'Net', value: '$' + fmtK(netMxn) + ' MXN', cls: netMxn >= 0 ? 'net-positive' : 'net-negative' },
       { label: 'Transactions', value: income.length + expenses.length }
     ];
@@ -955,42 +952,42 @@
     var income = loadLedger(INCOME_KEY);
     var expenses = loadLedger(EXPENSE_KEY);
 
-    // Group by month
+    // Group by month using string keys (no Date parsing bugs)
     var months = {};
     income.forEach(function(i) {
-      var key = i.date.substring(0, 7);
-      if (!months[key]) months[key] = { income: 0, expenseUSD: 0 };
-      months[key].income += i.currency === 'MXN' ? i.amount : i.amount * USD_MXN;
+      var key = getMonthKey(i.date);
+      if (!key) return;
+      if (!months[key]) months[key] = { incomeMXN: 0, expenseMXN: 0 };
+      months[key].incomeMXN += toMXN(i.amount, i.currency);
     });
     expenses.forEach(function(e) {
-      var key = e.date.substring(0, 7);
-      if (!months[key]) months[key] = { income: 0, expenseUSD: 0 };
-      months[key].expenseUSD += e.currency === 'USD' ? e.amount : e.amount / USD_MXN;
+      var key = getMonthKey(e.date);
+      if (!key) return;
+      if (!months[key]) months[key] = { incomeMXN: 0, expenseMXN: 0 };
+      months[key].expenseMXN += toMXN(e.amount, e.currency);
     });
 
     var keys = Object.keys(months).sort().reverse();
     if (keys.length === 0) { el.innerHTML = '<div class="ledger-empty">No data yet.</div>'; return; }
 
     var html = '<table><thead><tr>' +
-      '<th>Month</th><th style="text-align:right">Income MXN</th><th style="text-align:right">Expenses USD</th>' +
-      '<th style="text-align:right">Expenses MXN</th><th style="text-align:right">Net MXN</th>' +
+      '<th>Month</th><th style="text-align:right">Income</th>' +
+      '<th style="text-align:right">Expenses</th><th style="text-align:right">Net</th>' +
       '<th style="text-align:right">IVA (16%)</th>' +
       '</tr></thead><tbody>';
 
-    var totals = { inc: 0, expUSD: 0, expMXN: 0, net: 0, iva: 0 };
+    var totals = { inc: 0, exp: 0, net: 0, iva: 0 };
 
     keys.forEach(function(k) {
       var m = months[k];
-      var expMXN = m.expenseUSD * USD_MXN;
-      var net = m.income - expMXN;
-      var iva = m.income * 0.16;
-      totals.inc += m.income; totals.expUSD += m.expenseUSD; totals.expMXN += expMXN; totals.net += net; totals.iva += iva;
+      var net = m.incomeMXN - m.expenseMXN;
+      var iva = m.incomeMXN * 0.16;
+      totals.inc += m.incomeMXN; totals.exp += m.expenseMXN; totals.net += net; totals.iva += iva;
       var netCls = net >= 0 ? 'net-positive' : 'net-negative';
       html += '<tr>' +
         '<td>' + esc(k) + '</td>' +
-        '<td class="col-amount">' + fmtMoney(m.income, 'MXN') + '</td>' +
-        '<td class="col-amount">' + fmtMoney(m.expenseUSD, 'USD') + '</td>' +
-        '<td class="col-amount">' + fmtMoney(expMXN, 'MXN') + '</td>' +
+        '<td class="col-amount">' + fmtMoney(m.incomeMXN, 'MXN') + '</td>' +
+        '<td class="col-amount">' + fmtMoney(m.expenseMXN, 'MXN') + '</td>' +
         '<td class="col-amount ' + netCls + '">' + fmtMoney(net, 'MXN') + '</td>' +
         '<td class="col-amount">' + fmtMoney(iva, 'MXN') + '</td>' +
       '</tr>';
@@ -1000,8 +997,7 @@
     html += '<tr class="total-row">' +
       '<td>Total</td>' +
       '<td class="col-amount">' + fmtMoney(totals.inc, 'MXN') + '</td>' +
-      '<td class="col-amount">' + fmtMoney(totals.expUSD, 'USD') + '</td>' +
-      '<td class="col-amount">' + fmtMoney(totals.expMXN, 'MXN') + '</td>' +
+      '<td class="col-amount">' + fmtMoney(totals.exp, 'MXN') + '</td>' +
       '<td class="col-amount ' + totalNetCls + '">' + fmtMoney(totals.net, 'MXN') + '</td>' +
       '<td class="col-amount">' + fmtMoney(totals.iva, 'MXN') + '</td>' +
     '</tr>';
