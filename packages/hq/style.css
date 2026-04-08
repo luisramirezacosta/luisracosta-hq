@@ -680,11 +680,16 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
 .col-status.received, .col-status.done { color: var(--dot-green); }
 .col-status.pending { color: var(--dot-yellow); }
 .col-status.overdue { color: var(--dot-red); }
-.ledger-delete {
-  background: none; border: none; color: var(--text-faint); cursor: pointer; padding: 4px;
-  font-size: 14px; line-height: 1; transition: color var(--transition);
+.row-actions { display: flex; gap: 4px; justify-content: flex-end; }
+.ledger-edit, .ledger-delete {
+  background: none; border: none; color: var(--text-faint); cursor: pointer; padding: 4px 6px;
+  font-size: 14px; line-height: 1; transition: color var(--transition); border-radius: var(--radius-xs);
 }
-.ledger-delete:hover { color: var(--dot-red); }
+.ledger-edit:hover { color: var(--text); background: var(--accent-dim); }
+.ledger-delete:hover { color: var(--dot-red); background: rgba(239,68,68,0.08); }
+.row-clickable { cursor: pointer; }
+.row-clickable:hover td { background: var(--bg-hover); }
+.row-editing td { background: var(--accent-dim); }
 .ledger-empty { padding: 24px 0; color: var(--text-faint); font-size: 14px; }
 
 /* ── Monthly Summary Table ── */

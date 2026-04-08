@@ -796,32 +796,42 @@
     return '$' + Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + currency;
   }
 
+  // Editing state
+  var editingId = null; // currently editing item id (null = adding new)
+
   function renderIncomeTable() {
     var el = document.getElementById('income-table');
     if (!el) return;
     var income = loadLedger(INCOME_KEY);
-    if (income.length === 0) { el.innerHTML = '<div class="ledger-empty">No income recorded yet.</div>'; return; }
+    if (income.length === 0) { el.innerHTML = '<div class="ledger-empty">No income recorded yet. Click + Add above.</div>'; return; }
     income.sort(function(a, b) { return b.date.localeCompare(a.date); });
 
     var html = '<table><thead><tr>' +
       '<th>Date</th><th>Source</th><th>Description</th><th>Category</th><th>Status</th><th style="text-align:right">Amount</th><th></th>' +
       '</tr></thead><tbody>';
     income.forEach(function(i) {
-      html += '<tr>' +
+      var editing = editingId === i.id;
+      html += '<tr class="' + (editing ? 'row-editing' : 'row-clickable') + '" data-id="' + i.id + '" data-type="income">' +
         '<td class="col-date">' + esc(i.date) + '</td>' +
         '<td>' + esc(i.source) + '</td>' +
         '<td>' + esc(i.desc) + '</td>' +
         '<td><span class="col-tag">' + esc(i.category) + '</span></td>' +
         '<td><span class="col-status ' + esc(i.status) + '">' + esc(i.status) + '</span></td>' +
         '<td class="col-amount">' + fmtMoney(i.amount, i.currency) + '</td>' +
-        '<td><button class="ledger-delete" data-id="' + i.id + '" data-type="income" title="Delete">&times;</button></td>' +
+        '<td class="row-actions">' +
+          '<button class="ledger-edit" data-id="' + i.id + '" data-type="income" title="Edit">&#9998;</button>' +
+          '<button class="ledger-delete" data-id="' + i.id + '" data-type="income" title="Delete">&times;</button>' +
+        '</td>' +
       '</tr>';
     });
     html += '</tbody></table>';
     el.innerHTML = html;
 
     el.querySelectorAll('.ledger-delete').forEach(function(btn) {
-      btn.addEventListener('click', function() { deleteLedgerItem('income', btn.getAttribute('data-id')); });
+      btn.addEventListener('click', function(e) { e.stopPropagation(); deleteLedgerItem('income', btn.getAttribute('data-id')); });
+    });
+    el.querySelectorAll('.ledger-edit').forEach(function(btn) {
+      btn.addEventListener('click', function(e) { e.stopPropagation(); editLedgerItem('income', btn.getAttribute('data-id')); });
     });
   }
 
@@ -829,36 +839,105 @@
     var el = document.getElementById('expense-table');
     if (!el) return;
     var expenses = loadLedger(EXPENSE_KEY);
-    if (expenses.length === 0) { el.innerHTML = '<div class="ledger-empty">No expenses recorded yet.</div>'; return; }
+    if (expenses.length === 0) { el.innerHTML = '<div class="ledger-empty">No expenses recorded yet. Click + Add above.</div>'; return; }
     expenses.sort(function(a, b) { return b.date.localeCompare(a.date); });
 
     var html = '<table><thead><tr>' +
       '<th>Date</th><th>Vendor</th><th>Description</th><th>Category</th><th>Deductible</th><th style="text-align:right">Amount</th><th></th>' +
       '</tr></thead><tbody>';
     expenses.forEach(function(e) {
-      html += '<tr>' +
+      html += '<tr class="row-clickable" data-id="' + e.id + '" data-type="expense">' +
         '<td class="col-date">' + esc(e.date) + '</td>' +
         '<td>' + esc(e.vendor) + '</td>' +
         '<td>' + esc(e.desc) + '</td>' +
         '<td><span class="col-tag">' + esc(e.category) + '</span></td>' +
         '<td>' + (e.deductible ? 'Yes' : 'No') + '</td>' +
         '<td class="col-amount">' + fmtMoney(e.amount, e.currency) + '</td>' +
-        '<td><button class="ledger-delete" data-id="' + e.id + '" data-type="expense" title="Delete">&times;</button></td>' +
+        '<td class="row-actions">' +
+          '<button class="ledger-edit" data-id="' + e.id + '" data-type="expense" title="Edit">&#9998;</button>' +
+          '<button class="ledger-delete" data-id="' + e.id + '" data-type="expense" title="Delete">&times;</button>' +
+        '</td>' +
       '</tr>';
     });
     html += '</tbody></table>';
     el.innerHTML = html;
 
     el.querySelectorAll('.ledger-delete').forEach(function(btn) {
-      btn.addEventListener('click', function() { deleteLedgerItem('expense', btn.getAttribute('data-id')); });
+      btn.addEventListener('click', function(e) { e.stopPropagation(); deleteLedgerItem('expense', btn.getAttribute('data-id')); });
     });
+    el.querySelectorAll('.ledger-edit').forEach(function(btn) {
+      btn.addEventListener('click', function(e) { e.stopPropagation(); editLedgerItem('expense', btn.getAttribute('data-id')); });
+    });
+  }
+
+  function editLedgerItem(type, id) {
+    editingId = id;
+    if (type === 'income') {
+      var items = loadLedger(INCOME_KEY);
+      var item = items.find(function(i) { return i.id === id; });
+      if (!item) return;
+      document.getElementById('inc-date').value = item.date;
+      document.getElementById('inc-source').value = item.source;
+      document.getElementById('inc-desc').value = item.desc || '';
+      document.getElementById('inc-amount').value = item.amount;
+      document.getElementById('inc-currency').value = item.currency;
+      document.getElementById('inc-category').value = item.category;
+      document.getElementById('inc-status').value = item.status;
+      document.getElementById('income-form').classList.remove('hidden');
+      document.getElementById('save-income-btn').textContent = 'Update';
+      document.getElementById('add-income-btn').textContent = 'Editing...';
+      document.getElementById('inc-source').focus();
+    } else {
+      var items = loadLedger(EXPENSE_KEY);
+      var item = items.find(function(i) { return i.id === id; });
+      if (!item) return;
+      document.getElementById('exp-date').value = item.date;
+      document.getElementById('exp-vendor').value = item.vendor;
+      document.getElementById('exp-desc').value = item.desc || '';
+      document.getElementById('exp-amount').value = item.amount;
+      document.getElementById('exp-currency').value = item.currency;
+      document.getElementById('exp-category').value = item.category;
+      document.getElementById('exp-deductible').checked = item.deductible;
+      document.getElementById('expense-form').classList.remove('hidden');
+      document.getElementById('save-expense-btn').textContent = 'Update';
+      document.getElementById('add-expense-btn').textContent = 'Editing...';
+      document.getElementById('exp-vendor').focus();
+    }
+  }
+
+  function resetIncomeForm() {
+    editingId = null;
+    document.getElementById('income-form').classList.add('hidden');
+    document.getElementById('save-income-btn').textContent = 'Save';
+    document.getElementById('add-income-btn').textContent = '+ Add';
+    document.getElementById('inc-source').value = '';
+    document.getElementById('inc-desc').value = '';
+    document.getElementById('inc-amount').value = '';
+  }
+
+  function resetExpenseForm() {
+    editingId = null;
+    document.getElementById('expense-form').classList.add('hidden');
+    document.getElementById('save-expense-btn').textContent = 'Save';
+    document.getElementById('add-expense-btn').textContent = '+ Add';
+    document.getElementById('exp-vendor').value = '';
+    document.getElementById('exp-desc').value = '';
+    document.getElementById('exp-amount').value = '';
   }
 
   function deleteLedgerItem(type, id) {
     var key = type === 'income' ? INCOME_KEY : EXPENSE_KEY;
     var items = loadLedger(key).filter(function(i) { return i.id !== id; });
     saveLedger(key, items);
-    renderFinance();
+    if (editingId === id) { editingId = null; }
+    refreshFinanceViews();
+  }
+
+  function refreshFinanceViews() {
+    renderFinanceSummary();
+    renderIncomeTable();
+    renderExpenseTable();
+    renderMonthlySummary();
   }
 
   function renderMonthlySummary() {
@@ -985,70 +1064,112 @@
     if (_financeFormsInit) return;
     _financeFormsInit = true;
 
-    // Income form toggle
-    var incFormEl = document.getElementById('income-form');
+    // Income: Add button opens blank form
     document.getElementById('add-income-btn').addEventListener('click', function() {
-      incFormEl.classList.toggle('hidden');
-      if (!incFormEl.classList.contains('hidden')) {
-        document.getElementById('inc-date').value = formatISO(new Date());
-        document.getElementById('inc-source').focus();
+      var formEl = document.getElementById('income-form');
+      if (!formEl.classList.contains('hidden') && !editingId) {
+        resetIncomeForm(); return;
       }
+      editingId = null;
+      document.getElementById('inc-date').value = formatISO(new Date());
+      document.getElementById('inc-source').value = '';
+      document.getElementById('inc-desc').value = '';
+      document.getElementById('inc-amount').value = '';
+      document.getElementById('inc-currency').value = 'MXN';
+      document.getElementById('inc-category').value = 'retainer';
+      document.getElementById('inc-status').value = 'received';
+      document.getElementById('save-income-btn').textContent = 'Save';
+      document.getElementById('add-income-btn').textContent = '+ Add';
+      formEl.classList.remove('hidden');
+      document.getElementById('inc-source').focus();
     });
-    document.getElementById('cancel-income-btn').addEventListener('click', function() { incFormEl.classList.add('hidden'); });
+
+    // Income: Cancel
+    document.getElementById('cancel-income-btn').addEventListener('click', function() { resetIncomeForm(); });
+
+    // Income: Save (handles both add and edit)
     document.getElementById('save-income-btn').addEventListener('click', function() {
       var date = document.getElementById('inc-date').value;
       var source = document.getElementById('inc-source').value;
       var amount = parseFloat(document.getElementById('inc-amount').value);
       if (!date || !source || !amount) return;
+
       var items = loadLedger(INCOME_KEY);
-      items.push({
-        id: 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      var entry = {
         date: date, source: source, desc: document.getElementById('inc-desc').value || source,
         amount: amount, currency: document.getElementById('inc-currency').value,
         category: document.getElementById('inc-category').value,
         status: document.getElementById('inc-status').value
-      });
+      };
+
+      if (editingId) {
+        // Update existing
+        items = items.map(function(i) {
+          if (i.id === editingId) return Object.assign({}, i, entry);
+          return i;
+        });
+      } else {
+        // Add new
+        entry.id = 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+        items.push(entry);
+      }
+
       saveLedger(INCOME_KEY, items);
-      incFormEl.classList.add('hidden');
-      document.getElementById('inc-source').value = '';
-      document.getElementById('inc-desc').value = '';
-      document.getElementById('inc-amount').value = '';
-      renderFinanceSummary();
-      renderIncomeTable();
-      renderMonthlySummary();
+      resetIncomeForm();
+      refreshFinanceViews();
     });
 
-    // Expense form toggle
-    var expFormEl = document.getElementById('expense-form');
+    // Expense: Add button opens blank form
     document.getElementById('add-expense-btn').addEventListener('click', function() {
-      expFormEl.classList.toggle('hidden');
-      if (!expFormEl.classList.contains('hidden')) {
-        document.getElementById('exp-date').value = formatISO(new Date());
-        document.getElementById('exp-vendor').focus();
+      var formEl = document.getElementById('expense-form');
+      if (!formEl.classList.contains('hidden') && !editingId) {
+        resetExpenseForm(); return;
       }
+      editingId = null;
+      document.getElementById('exp-date').value = formatISO(new Date());
+      document.getElementById('exp-vendor').value = '';
+      document.getElementById('exp-desc').value = '';
+      document.getElementById('exp-amount').value = '';
+      document.getElementById('exp-currency').value = 'USD';
+      document.getElementById('exp-category').value = 'tools';
+      document.getElementById('exp-deductible').checked = true;
+      document.getElementById('save-expense-btn').textContent = 'Save';
+      document.getElementById('add-expense-btn').textContent = '+ Add';
+      formEl.classList.remove('hidden');
+      document.getElementById('exp-vendor').focus();
     });
-    document.getElementById('cancel-expense-btn').addEventListener('click', function() { expFormEl.classList.add('hidden'); });
+
+    // Expense: Cancel
+    document.getElementById('cancel-expense-btn').addEventListener('click', function() { resetExpenseForm(); });
+
+    // Expense: Save (handles both add and edit)
     document.getElementById('save-expense-btn').addEventListener('click', function() {
       var date = document.getElementById('exp-date').value;
       var vendor = document.getElementById('exp-vendor').value;
       var amount = parseFloat(document.getElementById('exp-amount').value);
       if (!date || !vendor || !amount) return;
+
       var items = loadLedger(EXPENSE_KEY);
-      items.push({
-        id: 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      var entry = {
         date: date, vendor: vendor, desc: document.getElementById('exp-desc').value || vendor,
         amount: amount, currency: document.getElementById('exp-currency').value,
         category: document.getElementById('exp-category').value,
         deductible: document.getElementById('exp-deductible').checked
-      });
+      };
+
+      if (editingId) {
+        items = items.map(function(e) {
+          if (e.id === editingId) return Object.assign({}, e, entry);
+          return e;
+        });
+      } else {
+        entry.id = 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+        items.push(entry);
+      }
+
       saveLedger(EXPENSE_KEY, items);
-      expFormEl.classList.add('hidden');
-      document.getElementById('exp-vendor').value = '';
-      document.getElementById('exp-desc').value = '';
-      document.getElementById('exp-amount').value = '';
-      renderFinanceSummary();
-      renderExpenseTable();
-      renderMonthlySummary();
+      resetExpenseForm();
+      refreshFinanceViews();
     });
   }
 
