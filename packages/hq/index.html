@@ -118,27 +118,60 @@
     <!-- ====== FINANCE TAB ====== -->
     <main id="view-finance" class="main hidden">
 
-      <!-- Finance Summary -->
+      <!-- Summary Cards -->
       <section class="dash-section">
-        <h2 class="dash-title">Financial Overview</h2>
         <div id="finance-summary" class="finance-summary"></div>
       </section>
 
-      <!-- Revenue Streams -->
+      <!-- Income -->
       <section class="dash-section">
-        <h2 class="dash-title">Revenue Streams</h2>
-        <div id="finance-revenue" class="finance-revenue"></div>
+        <div class="dash-title-row">
+          <h2 class="dash-title">Income</h2>
+          <button id="add-income-btn" class="add-btn">+ Add</button>
+        </div>
+        <div id="income-form" class="ledger-form hidden">
+          <input type="date" id="inc-date" class="ledger-input">
+          <input type="text" id="inc-source" class="ledger-input" placeholder="Source">
+          <input type="text" id="inc-desc" class="ledger-input ledger-input-wide" placeholder="Description">
+          <input type="number" id="inc-amount" class="ledger-input ledger-input-num" placeholder="Amount" step="0.01">
+          <select id="inc-currency" class="ledger-input ledger-input-sm"><option>MXN</option><option>USD</option></select>
+          <select id="inc-category" class="ledger-input"><option value="retainer">Retainer</option><option value="project">Project</option><option value="one-time">One-time</option></select>
+          <select id="inc-status" class="ledger-input"><option value="received">Received</option><option value="pending">Pending</option><option value="overdue">Overdue</option></select>
+          <button id="save-income-btn" class="save-btn">Save</button>
+          <button id="cancel-income-btn" class="cancel-btn">Cancel</button>
+        </div>
+        <div id="income-table" class="ledger-table"></div>
       </section>
 
       <!-- Expenses -->
       <section class="dash-section">
-        <h2 class="dash-title">Monthly Expenses</h2>
-        <div id="finance-expenses" class="finance-expenses"></div>
+        <div class="dash-title-row">
+          <h2 class="dash-title">Expenses</h2>
+          <button id="add-expense-btn" class="add-btn">+ Add</button>
+        </div>
+        <div id="expense-form" class="ledger-form hidden">
+          <input type="date" id="exp-date" class="ledger-input">
+          <input type="text" id="exp-vendor" class="ledger-input" placeholder="Vendor">
+          <input type="text" id="exp-desc" class="ledger-input ledger-input-wide" placeholder="Description">
+          <input type="number" id="exp-amount" class="ledger-input ledger-input-num" placeholder="Amount" step="0.01">
+          <select id="exp-currency" class="ledger-input ledger-input-sm"><option>USD</option><option>MXN</option></select>
+          <select id="exp-category" class="ledger-input"><option value="tools">Tools</option><option value="business">Business</option><option value="personal">Personal</option><option value="travel">Travel</option></select>
+          <label class="ledger-check"><input type="checkbox" id="exp-deductible" checked> Deductible</label>
+          <button id="save-expense-btn" class="save-btn">Save</button>
+          <button id="cancel-expense-btn" class="cancel-btn">Cancel</button>
+        </div>
+        <div id="expense-table" class="ledger-table"></div>
+      </section>
+
+      <!-- Monthly Summary -->
+      <section class="dash-section">
+        <h2 class="dash-title">Monthly Summary</h2>
+        <div id="monthly-summary" class="monthly-summary-table"></div>
       </section>
 
       <!-- Tax Compliance -->
       <section class="dash-section">
-        <h2 class="dash-title">Tax Compliance</h2>
+        <h2 class="dash-title">Tax Calendar</h2>
         <div id="finance-tax" class="finance-tax-card"></div>
       </section>
 

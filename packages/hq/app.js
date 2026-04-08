@@ -695,109 +695,361 @@
     });
   }
 
-  // ── Finance ───────────────────────────────
+  // ── Finance (Interactive Ledger) ───────────
+
+  var INCOME_KEY = 'hq_income';
+  var EXPENSE_KEY = 'hq_expenses';
+  var USD_MXN = 17; // approximate rate, update as needed
+
+  function loadLedger(key) {
+    var ls = _ls(); if (!ls) return [];
+    try { var raw = ls.getItem(key); return raw ? JSON.parse(raw) : []; } catch(e) { return []; }
+  }
+  function saveLedger(key, items) {
+    var ls = _ls(); if (!ls) return;
+    try { ls.setItem(key, JSON.stringify(items)); } catch(e) {}
+  }
+
+  function seedDefaults() {
+    var income = loadLedger(INCOME_KEY);
+    var expenses = loadLedger(EXPENSE_KEY);
+    if (income.length === 0 && data && data.finance && data.finance.revenue) {
+      data.finance.revenue.forEach(function(r) {
+        income.push({
+          id: 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+          date: '2026-04-01', source: r.source, desc: r.type + ' — monthly',
+          amount: r.amount, currency: r.currency, category: r.type, status: 'received'
+        });
+      });
+      saveLedger(INCOME_KEY, income);
+    }
+    if (expenses.length === 0 && data && data.finance && data.finance.expenses) {
+      data.finance.expenses.forEach(function(e) {
+        expenses.push({
+          id: 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+          date: '2026-04-01', vendor: e.item, desc: e.item,
+          amount: e.amount, currency: e.currency, category: e.category, deductible: true
+        });
+      });
+      saveLedger(EXPENSE_KEY, expenses);
+    }
+  }
 
   function renderFinance() {
-    if (!data || !data.finance) return;
+    seedDefaults();
     renderFinanceSummary();
-    renderFinanceRevenue();
-    renderFinanceExpenses();
+    renderIncomeTable();
+    renderExpenseTable();
+    renderMonthlySummary();
     renderFinanceTax();
+    initFinanceForms();
   }
 
   function renderFinanceSummary() {
     var el = document.getElementById('finance-summary');
     if (!el) return;
-    var f = data.finance;
-    var mrrFormatted = '$' + (f.mrr_mxn / 1000).toFixed(0) + 'K MXN';
-    var costsFormatted = '$' + f.costs_usd + ' USD';
-    var netMxn = f.mrr_mxn - (f.costs_usd * 17); // approximate USD→MXN
-    var netFormatted = '$' + (netMxn / 1000).toFixed(1) + 'K MXN';
-    var runway = f.runway_months ? f.runway_months + ' mo' : '—';
+    var income = loadLedger(INCOME_KEY);
+    var expenses = loadLedger(EXPENSE_KEY);
 
+    var now = new Date();
+    var curMonth = now.getMonth();
+    var curYear = now.getFullYear();
+
+    var monthIncome = 0;
+    income.forEach(function(i) {
+      var d = new Date(i.date);
+      if (d.getMonth() === curMonth && d.getFullYear() === curYear) {
+        monthIncome += i.currency === 'MXN' ? i.amount : i.amount * USD_MXN;
+      }
+    });
+
+    var monthExpenseUSD = 0;
+    expenses.forEach(function(e) {
+      var d = new Date(e.date);
+      if (d.getMonth() === curMonth && d.getFullYear() === curYear) {
+        monthExpenseUSD += e.currency === 'USD' ? e.amount : e.amount / USD_MXN;
+      }
+    });
+
+    var netMxn = monthIncome - (monthExpenseUSD * USD_MXN);
     var cards = [
-      { label: 'MRR', value: mrrFormatted },
-      { label: 'Monthly Costs', value: costsFormatted },
-      { label: 'Net (approx)', value: netFormatted },
-      { label: 'Runway', value: runway }
+      { label: 'Income this month', value: '$' + fmtK(monthIncome) + ' MXN' },
+      { label: 'Expenses this month', value: '$' + Math.round(monthExpenseUSD) + ' USD' },
+      { label: 'Net', value: '$' + fmtK(netMxn) + ' MXN', cls: netMxn >= 0 ? 'net-positive' : 'net-negative' },
+      { label: 'Transactions', value: income.length + expenses.length }
     ];
 
     el.innerHTML = cards.map(function(c) {
       return '<div class="finance-card">' +
-        '<span class="finance-card-value">' + esc(c.value) + '</span>' +
+        '<span class="finance-card-value ' + (c.cls || '') + '">' + esc(String(c.value)) + '</span>' +
         '<span class="finance-card-label">' + esc(c.label) + '</span>' +
       '</div>';
     }).join('');
   }
 
-  function renderFinanceRevenue() {
-    var el = document.getElementById('finance-revenue');
-    if (!el || !data.finance.revenue) return;
-
-    el.innerHTML = data.finance.revenue.map(function(r) {
-      var cfdiCls = r.cfdi ? 'active' : 'inactive';
-      var cfdiLabel = r.cfdi ? 'CFDI' : 'No CFDI';
-      return '<div class="revenue-row">' +
-        '<span class="revenue-source">' + esc(r.source) + '</span>' +
-        '<div class="revenue-right">' +
-          '<span class="cfdi-badge ' + cfdiCls + '">' + cfdiLabel + '</span>' +
-          '<span class="revenue-type">' + esc(r.type) + '</span>' +
-          '<span class="revenue-amount">$' + r.amount.toLocaleString() + ' ' + esc(r.currency) + '</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+  function fmtK(n) {
+    if (Math.abs(n) >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return Math.round(n).toLocaleString();
   }
 
-  function renderFinanceExpenses() {
-    var el = document.getElementById('finance-expenses');
-    if (!el || !data.finance.expenses) return;
+  function fmtMoney(amount, currency) {
+    return '$' + Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + currency;
+  }
 
-    var sorted = data.finance.expenses.slice().sort(function(a, b) { return b.amount - a.amount; });
+  function renderIncomeTable() {
+    var el = document.getElementById('income-table');
+    if (!el) return;
+    var income = loadLedger(INCOME_KEY);
+    if (income.length === 0) { el.innerHTML = '<div class="ledger-empty">No income recorded yet.</div>'; return; }
+    income.sort(function(a, b) { return b.date.localeCompare(a.date); });
 
-    el.innerHTML = sorted.map(function(e) {
-      return '<div class="expense-row">' +
-        '<span class="expense-item">' + esc(e.item) + '</span>' +
-        '<div class="expense-right">' +
-          '<span class="expense-category">' + esc(e.category) + '</span>' +
-          '<span class="expense-amount">$' + e.amount + ' ' + esc(e.currency) + '</span>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+    var html = '<table><thead><tr>' +
+      '<th>Date</th><th>Source</th><th>Description</th><th>Category</th><th>Status</th><th style="text-align:right">Amount</th><th></th>' +
+      '</tr></thead><tbody>';
+    income.forEach(function(i) {
+      html += '<tr>' +
+        '<td class="col-date">' + esc(i.date) + '</td>' +
+        '<td>' + esc(i.source) + '</td>' +
+        '<td>' + esc(i.desc) + '</td>' +
+        '<td><span class="col-tag">' + esc(i.category) + '</span></td>' +
+        '<td><span class="col-status ' + esc(i.status) + '">' + esc(i.status) + '</span></td>' +
+        '<td class="col-amount">' + fmtMoney(i.amount, i.currency) + '</td>' +
+        '<td><button class="ledger-delete" data-id="' + i.id + '" data-type="income" title="Delete">&times;</button></td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+
+    el.querySelectorAll('.ledger-delete').forEach(function(btn) {
+      btn.addEventListener('click', function() { deleteLedgerItem('income', btn.getAttribute('data-id')); });
+    });
+  }
+
+  function renderExpenseTable() {
+    var el = document.getElementById('expense-table');
+    if (!el) return;
+    var expenses = loadLedger(EXPENSE_KEY);
+    if (expenses.length === 0) { el.innerHTML = '<div class="ledger-empty">No expenses recorded yet.</div>'; return; }
+    expenses.sort(function(a, b) { return b.date.localeCompare(a.date); });
+
+    var html = '<table><thead><tr>' +
+      '<th>Date</th><th>Vendor</th><th>Description</th><th>Category</th><th>Deductible</th><th style="text-align:right">Amount</th><th></th>' +
+      '</tr></thead><tbody>';
+    expenses.forEach(function(e) {
+      html += '<tr>' +
+        '<td class="col-date">' + esc(e.date) + '</td>' +
+        '<td>' + esc(e.vendor) + '</td>' +
+        '<td>' + esc(e.desc) + '</td>' +
+        '<td><span class="col-tag">' + esc(e.category) + '</span></td>' +
+        '<td>' + (e.deductible ? 'Yes' : 'No') + '</td>' +
+        '<td class="col-amount">' + fmtMoney(e.amount, e.currency) + '</td>' +
+        '<td><button class="ledger-delete" data-id="' + e.id + '" data-type="expense" title="Delete">&times;</button></td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+
+    el.querySelectorAll('.ledger-delete').forEach(function(btn) {
+      btn.addEventListener('click', function() { deleteLedgerItem('expense', btn.getAttribute('data-id')); });
+    });
+  }
+
+  function deleteLedgerItem(type, id) {
+    var key = type === 'income' ? INCOME_KEY : EXPENSE_KEY;
+    var items = loadLedger(key).filter(function(i) { return i.id !== id; });
+    saveLedger(key, items);
+    renderFinance();
+  }
+
+  function renderMonthlySummary() {
+    var el = document.getElementById('monthly-summary');
+    if (!el) return;
+    var income = loadLedger(INCOME_KEY);
+    var expenses = loadLedger(EXPENSE_KEY);
+
+    // Group by month
+    var months = {};
+    income.forEach(function(i) {
+      var key = i.date.substring(0, 7);
+      if (!months[key]) months[key] = { income: 0, expenseUSD: 0 };
+      months[key].income += i.currency === 'MXN' ? i.amount : i.amount * USD_MXN;
+    });
+    expenses.forEach(function(e) {
+      var key = e.date.substring(0, 7);
+      if (!months[key]) months[key] = { income: 0, expenseUSD: 0 };
+      months[key].expenseUSD += e.currency === 'USD' ? e.amount : e.amount / USD_MXN;
+    });
+
+    var keys = Object.keys(months).sort().reverse();
+    if (keys.length === 0) { el.innerHTML = '<div class="ledger-empty">No data yet.</div>'; return; }
+
+    var html = '<table><thead><tr>' +
+      '<th>Month</th><th style="text-align:right">Income MXN</th><th style="text-align:right">Expenses USD</th>' +
+      '<th style="text-align:right">Expenses MXN</th><th style="text-align:right">Net MXN</th>' +
+      '<th style="text-align:right">IVA (16%)</th>' +
+      '</tr></thead><tbody>';
+
+    var totals = { inc: 0, expUSD: 0, expMXN: 0, net: 0, iva: 0 };
+
+    keys.forEach(function(k) {
+      var m = months[k];
+      var expMXN = m.expenseUSD * USD_MXN;
+      var net = m.income - expMXN;
+      var iva = m.income * 0.16;
+      totals.inc += m.income; totals.expUSD += m.expenseUSD; totals.expMXN += expMXN; totals.net += net; totals.iva += iva;
+      var netCls = net >= 0 ? 'net-positive' : 'net-negative';
+      html += '<tr>' +
+        '<td>' + esc(k) + '</td>' +
+        '<td class="col-amount">' + fmtMoney(m.income, 'MXN') + '</td>' +
+        '<td class="col-amount">' + fmtMoney(m.expenseUSD, 'USD') + '</td>' +
+        '<td class="col-amount">' + fmtMoney(expMXN, 'MXN') + '</td>' +
+        '<td class="col-amount ' + netCls + '">' + fmtMoney(net, 'MXN') + '</td>' +
+        '<td class="col-amount">' + fmtMoney(iva, 'MXN') + '</td>' +
+      '</tr>';
+    });
+
+    var totalNetCls = totals.net >= 0 ? 'net-positive' : 'net-negative';
+    html += '<tr class="total-row">' +
+      '<td>Total</td>' +
+      '<td class="col-amount">' + fmtMoney(totals.inc, 'MXN') + '</td>' +
+      '<td class="col-amount">' + fmtMoney(totals.expUSD, 'USD') + '</td>' +
+      '<td class="col-amount">' + fmtMoney(totals.expMXN, 'MXN') + '</td>' +
+      '<td class="col-amount ' + totalNetCls + '">' + fmtMoney(totals.net, 'MXN') + '</td>' +
+      '<td class="col-amount">' + fmtMoney(totals.iva, 'MXN') + '</td>' +
+    '</tr>';
+    html += '</tbody></table>';
+    el.innerHTML = html;
   }
 
   function renderFinanceTax() {
     var el = document.getElementById('finance-tax');
-    if (!el || !data.finance.tax) return;
+    if (!el || !data || !data.finance || !data.finance.tax) return;
     var t = data.finance.tax;
 
-    var rows = [
-      { label: 'Regime', value: t.regime },
-      { label: 'Next Declaration', value: t.next_declaration },
-      { label: 'IVA Rate', value: (t.iva_rate * 100) + '%' },
-      { label: 'CFDI Status', value: t.cfdi_status.replace(/_/g, ' ') }
+    var taxDates = [
+      { date: '2026-04-17', name: 'SAT Monthly', desc: 'March — ISR + IVA' },
+      { date: '2026-04-30', name: 'SAT Annual', desc: 'FY 2025 annual return' },
+      { date: '2026-05-17', name: 'SAT Monthly', desc: 'April — ISR + IVA' },
+      { date: '2026-06-17', name: 'SAT Monthly', desc: 'May — ISR + IVA' },
+      { date: '2026-07-17', name: 'SAT Monthly', desc: 'June — ISR + IVA' },
+      { date: '2026-08-17', name: 'SAT Monthly', desc: 'July — ISR + IVA' },
+      { date: '2026-09-17', name: 'SAT Monthly', desc: 'August — ISR + IVA' },
+      { date: '2026-10-17', name: 'SAT Monthly', desc: 'September — ISR + IVA' },
+      { date: '2026-11-17', name: 'SAT Monthly', desc: 'October — ISR + IVA' },
+      { date: '2026-12-17', name: 'SAT Monthly', desc: 'November — ISR + IVA' }
     ];
 
-    var html = rows.map(function(r) {
-      return '<div class="tax-row">' +
-        '<span class="tax-label">' + esc(r.label) + '</span>' +
-        '<span class="tax-value">' + esc(r.value) + '</span>' +
-      '</div>';
-    }).join('');
+    var now = new Date();
+    var html = '';
 
-    // Alert if next declaration < 14 days
-    if (t.next_declaration) {
-      var declDate = new Date(t.next_declaration + 'T23:59:59');
-      var daysUntil = Math.ceil((declDate - new Date()) / (1000 * 60 * 60 * 24));
-      if (daysUntil <= 14 && daysUntil > 0) {
-        html += '<div class="tax-alert">SAT declaration due in ' + daysUntil + ' days (' + t.next_declaration + ')</div>';
+    // Alert for nearest upcoming
+    var nearest = taxDates.find(function(td) { return new Date(td.date + 'T23:59:59') >= now; });
+    if (nearest) {
+      var daysUntil = Math.ceil((new Date(nearest.date + 'T23:59:59') - now) / (1000 * 60 * 60 * 24));
+      if (daysUntil <= 14) {
+        html += '<div class="tax-alert">' + nearest.name + ' due in ' + daysUntil + ' days (' + nearest.date + ')</div>';
       }
     }
 
-    if (t.sat_notes) {
-      html += '<div class="tax-row"><span class="tax-label">Note</span><span class="tax-value">' + esc(t.sat_notes) + '</span></div>';
-    }
+    // CFDI status
+    html += '<div class="tax-item">' +
+      '<div class="tax-item-left">' +
+        '<span class="tax-date">CFDI</span>' +
+        '<div><div class="tax-obligation">' + esc(t.regime) + '</div>' +
+        '<div class="tax-desc">Status: ' + esc(t.cfdi_status.replace(/_/g, ' ')) + ' · IVA: ' + (t.iva_rate * 100) + '%</div></div>' +
+      '</div>' +
+      '<span class="tax-status-chip pending">' + esc(t.cfdi_status.replace(/_/g, ' ')) + '</span>' +
+    '</div>';
+
+    taxDates.forEach(function(td) {
+      var past = new Date(td.date + 'T23:59:59') < now;
+      var status = past ? 'done' : 'pending';
+      html += '<div class="tax-item">' +
+        '<div class="tax-item-left">' +
+          '<span class="tax-date">' + esc(td.date) + '</span>' +
+          '<div><div class="tax-obligation">' + esc(td.name) + '</div>' +
+          '<div class="tax-desc">' + esc(td.desc) + '</div></div>' +
+        '</div>' +
+        '<span class="tax-status-chip ' + status + '">' + status + '</span>' +
+      '</div>';
+    });
 
     el.innerHTML = html;
+  }
+
+  // ── Finance Forms ────────────────────────
+
+  var _financeFormsInit = false;
+
+  function initFinanceForms() {
+    if (_financeFormsInit) return;
+    _financeFormsInit = true;
+
+    // Income form toggle
+    var incFormEl = document.getElementById('income-form');
+    document.getElementById('add-income-btn').addEventListener('click', function() {
+      incFormEl.classList.toggle('hidden');
+      if (!incFormEl.classList.contains('hidden')) {
+        document.getElementById('inc-date').value = formatISO(new Date());
+        document.getElementById('inc-source').focus();
+      }
+    });
+    document.getElementById('cancel-income-btn').addEventListener('click', function() { incFormEl.classList.add('hidden'); });
+    document.getElementById('save-income-btn').addEventListener('click', function() {
+      var date = document.getElementById('inc-date').value;
+      var source = document.getElementById('inc-source').value;
+      var amount = parseFloat(document.getElementById('inc-amount').value);
+      if (!date || !source || !amount) return;
+      var items = loadLedger(INCOME_KEY);
+      items.push({
+        id: 'i_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+        date: date, source: source, desc: document.getElementById('inc-desc').value || source,
+        amount: amount, currency: document.getElementById('inc-currency').value,
+        category: document.getElementById('inc-category').value,
+        status: document.getElementById('inc-status').value
+      });
+      saveLedger(INCOME_KEY, items);
+      incFormEl.classList.add('hidden');
+      document.getElementById('inc-source').value = '';
+      document.getElementById('inc-desc').value = '';
+      document.getElementById('inc-amount').value = '';
+      renderFinanceSummary();
+      renderIncomeTable();
+      renderMonthlySummary();
+    });
+
+    // Expense form toggle
+    var expFormEl = document.getElementById('expense-form');
+    document.getElementById('add-expense-btn').addEventListener('click', function() {
+      expFormEl.classList.toggle('hidden');
+      if (!expFormEl.classList.contains('hidden')) {
+        document.getElementById('exp-date').value = formatISO(new Date());
+        document.getElementById('exp-vendor').focus();
+      }
+    });
+    document.getElementById('cancel-expense-btn').addEventListener('click', function() { expFormEl.classList.add('hidden'); });
+    document.getElementById('save-expense-btn').addEventListener('click', function() {
+      var date = document.getElementById('exp-date').value;
+      var vendor = document.getElementById('exp-vendor').value;
+      var amount = parseFloat(document.getElementById('exp-amount').value);
+      if (!date || !vendor || !amount) return;
+      var items = loadLedger(EXPENSE_KEY);
+      items.push({
+        id: 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+        date: date, vendor: vendor, desc: document.getElementById('exp-desc').value || vendor,
+        amount: amount, currency: document.getElementById('exp-currency').value,
+        category: document.getElementById('exp-category').value,
+        deductible: document.getElementById('exp-deductible').checked
+      });
+      saveLedger(EXPENSE_KEY, items);
+      expFormEl.classList.add('hidden');
+      document.getElementById('exp-vendor').value = '';
+      document.getElementById('exp-desc').value = '';
+      document.getElementById('exp-amount').value = '';
+      renderFinanceSummary();
+      renderExpenseTable();
+      renderMonthlySummary();
+    });
   }
 
   // ── LinkedIn KPIs ────────────────────────

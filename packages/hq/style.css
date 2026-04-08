@@ -612,51 +612,124 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-body);
   font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
 }
 
-.finance-revenue { display: flex; flex-direction: column; gap: 8px; }
-.revenue-row {
-  display: flex; align-items: center; justify-content: space-between;
+/* ── Title Row + Add Button ── */
+.dash-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+.add-btn {
+  padding: 6px 14px; background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text-secondary); font-family: var(--font-body);
+  font-size: 13px; cursor: pointer; transition: all var(--transition);
+}
+.add-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* ── Ledger Form ── */
+.ledger-form {
+  display: flex; flex-wrap: wrap; gap: 8px; padding: 16px;
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  margin-bottom: 12px; align-items: center;
 }
-.revenue-source { font-weight: 500; color: var(--text); }
-.revenue-right { display: flex; align-items: center; gap: 12px; }
-.revenue-amount { font-family: var(--font-mono); font-size: 14px; color: var(--text); }
-.revenue-type {
+.ledger-input {
+  padding: 8px 12px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-xs); color: var(--text); font-family: var(--font-body);
+  font-size: 13px; outline: none; transition: border-color var(--transition); min-width: 0;
+}
+.ledger-input:focus { border-color: var(--border-light); }
+.ledger-input-wide { flex: 1; min-width: 160px; }
+.ledger-input-num { width: 110px; }
+.ledger-input-sm { width: 80px; }
+.ledger-check {
+  display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary);
+  cursor: pointer;
+}
+.ledger-check input { accent-color: var(--text); }
+.save-btn {
+  padding: 8px 16px; background: var(--text); color: var(--bg); border: none;
+  border-radius: var(--radius-xs); font-family: var(--font-body); font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: opacity var(--transition);
+}
+.save-btn:hover { opacity: 0.85; }
+.cancel-btn {
+  padding: 8px 12px; background: transparent; border: 1px solid var(--border);
+  border-radius: var(--radius-xs); color: var(--text-muted); font-family: var(--font-body);
+  font-size: 13px; cursor: pointer; transition: all var(--transition);
+}
+.cancel-btn:hover { border-color: var(--text-muted); }
+
+/* ── Ledger Table ── */
+.ledger-table { width: 100%; overflow-x: auto; }
+.ledger-table table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.ledger-table th {
+  text-align: left; padding: 8px 12px; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 1px solid var(--border);
+  font-weight: 500; white-space: nowrap;
+}
+.ledger-table td {
+  padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text);
+  white-space: nowrap;
+}
+.ledger-table tr:hover td { background: var(--bg-hover); }
+.ledger-table .col-amount { font-family: var(--font-mono); text-align: right; }
+.ledger-table .col-date { color: var(--text-muted); font-family: var(--font-mono); font-size: 12px; }
+.ledger-table .col-tag {
   font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
   padding: 2px 8px; border-radius: var(--radius-xs); background: var(--accent-dim); color: var(--text-muted);
+  display: inline-block;
 }
-.cfdi-badge {
-  font-size: 10px; padding: 2px 8px; border-radius: var(--radius-xs); font-weight: 500;
+.ledger-table .col-status { font-size: 12px; font-weight: 500; }
+.col-status.received, .col-status.done { color: var(--dot-green); }
+.col-status.pending { color: var(--dot-yellow); }
+.col-status.overdue { color: var(--dot-red); }
+.ledger-delete {
+  background: none; border: none; color: var(--text-faint); cursor: pointer; padding: 4px;
+  font-size: 14px; line-height: 1; transition: color var(--transition);
 }
-.cfdi-badge.active { background: rgba(34,197,94,0.12); color: var(--dot-green); }
-.cfdi-badge.inactive { background: rgba(239,68,68,0.12); color: var(--dot-red); }
+.ledger-delete:hover { color: var(--dot-red); }
+.ledger-empty { padding: 24px 0; color: var(--text-faint); font-size: 14px; }
 
-.finance-expenses { display: flex; flex-direction: column; gap: 8px; }
-.expense-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+/* ── Monthly Summary Table ── */
+.monthly-summary-table table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
 }
-.expense-item { font-size: 14px; color: var(--text); }
-.expense-right { display: flex; align-items: center; gap: 12px; }
-.expense-amount { font-family: var(--font-mono); font-size: 13px; color: var(--text-secondary); }
-.expense-category {
-  font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
-  padding: 2px 8px; border-radius: var(--radius-xs); background: var(--accent-dim); color: var(--text-muted);
+.monthly-summary-table th {
+  text-align: left; padding: 8px 12px; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-muted); border-bottom: 1px solid var(--border);
+  font-weight: 500;
 }
+.monthly-summary-table td {
+  padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text);
+}
+.monthly-summary-table .col-amount { font-family: var(--font-mono); text-align: right; }
+.monthly-summary-table .total-row td { font-weight: 700; border-top: 2px solid var(--border); }
+.net-positive { color: var(--dot-green); }
+.net-negative { color: var(--dot-red); }
 
+/* ── Tax Calendar ── */
 .finance-tax-card {
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  padding: 0; overflow: hidden;
 }
-.tax-row { display: flex; justify-content: space-between; align-items: center; }
-.tax-label { font-size: 13px; color: var(--text-muted); }
-.tax-value { font-size: 13px; color: var(--text); font-weight: 500; }
+.tax-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+}
+.tax-item:last-child { border-bottom: none; }
+.tax-item-left { display: flex; align-items: center; gap: 12px; }
+.tax-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); min-width: 90px; }
+.tax-obligation { font-size: 13px; color: var(--text); }
+.tax-desc { font-size: 12px; color: var(--text-muted); }
+.tax-status-chip {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 3px 10px; border-radius: var(--radius-xs); font-weight: 500;
+}
+.tax-status-chip.pending { background: rgba(234,179,8,0.12); color: #A16207; }
+.tax-status-chip.done { background: rgba(34,197,94,0.12); color: var(--dot-green); }
 .tax-alert {
-  padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
-  background: rgba(234,179,8,0.12); color: #A16207;
+  padding: 12px 16px; font-size: 13px; font-weight: 500;
+  background: rgba(234,179,8,0.12); color: #A16207; border-bottom: 1px solid var(--border);
 }
 [data-theme="dark"] .tax-alert { color: #EAB308; }
+[data-theme="dark"] .tax-status-chip.pending { color: #EAB308; }
 
 /* ============================================
    POSTURE SCORE
